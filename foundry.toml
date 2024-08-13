@@ -11,13 +11,6 @@ solc = '0.8.19'
 
 [rpc_endpoints]
 ethereumSepolia = "${ETHEREUM_SEPOLIA_RPC_URL}"
-optimismGoerli = "${OPTIMISM_GOERLI_RPC_URL}"
-avalancheFuji = "${AVALANCHE_FUJI_RPC_URL}"
-arbitrumSepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
-polygonMumbai = "${POLYGON_MUMBAI_RPC_URL}"
-bnbChainTestnet = "${BNB_CHAIN_TESTNET_RPC_URL}"
-baseSepolia = "${BASE_SEPOLIA_RPC_URL}"
-metisSepolia = "${METIS_SEPOLIA_RPC_URL}"
-zksyncSepolia = "${ZKSYNC_SEPOLIA_RPC_URL}"
+modeSepolia = "${MODE_SEPOLIA_RPC_URL}"
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
