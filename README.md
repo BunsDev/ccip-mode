@@ -63,14 +63,7 @@ Create a new file by copying the `.env.example` file, and name it `.env`. Fill i
 ```shell
 PRIVATE_KEY=""
 ETHEREUM_SEPOLIA_RPC_URL=""
-ARBITRUM_SEPOLIA_RPC_URL=""
-AVALANCHE_FUJI_RPC_URL=""
-POLYGON_MUMBAI_RPC_URL=""
-BNB_CHAIN_TESTNET_RPC_URL=""
-WEMIX_TESTNET_RPC_URL=""
-KROMA_SEPOLIA_TESTNET_RPC_URL=""
-METIS_SEPOLIA_RPC_URL=""
-ZKSYNC_SEPOLIA_RPC_URL=""
+MODE_SEPOLIA_RPC_URL=""
 ```
 
 Once that is done, to load the variables in the `.env` file, run the following command:
@@ -86,16 +79,7 @@ This contract also contains some enums, like `SupportedNetworks`:
 ```solidity
 enum SupportedNetworks {
     ETHEREUM_SEPOLIA, // 0
-    AVALANCHE_FUJI, // 1
-    ARBITRUM_SEPOLIA, // 2
-    POLYGON_MUMBAI, // 3
-    BNB_CHAIN_TESTNET, // 4
-    OPTIMISM_SEPOLIA, // 5
-    BASE_SEPOLIA, // 6
-    WEMIX_TESTNET, // 7
-    KROMA_SEPOLIA_TESTNET, // 8
-    METIS_SEPOLIA, // 9
-    ZKSYNC_SEPOLIA // 10
+    MODE_SEPOLIA, // 919
 }
 ```
 
