@@ -2,6 +2,7 @@
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
     "solidity.packageDefaultDependenciesDirectory": "lib",
     "solidity.remappings": [
-        "forge-std/=lib/forge-std/src/"
+        "forge-std/=lib/forge-std/src/",
+        "@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip/"
     ]
 }
