@@ -42,13 +42,13 @@ contract Helper {
     address constant ccipBnMEthereumSepolia =
         0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05;
     address constant ccipBnMModeSepolia =
-        0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05;
+        0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5;
 
     // CCIP-LnM Addresses
     address constant ccipLnMEthereumSepolia =
         0x466D489b6d36E7E3b824ef491C225F5830E81cC1;
     address constant clCcipLnMModeSepolia =
-        0x466D489b6d36E7E3b824ef491C225F5830E81cC1;
+        0x86f9Eed8EAD1534D87d23FbAB247D764fC725D49;
 
     constructor() {
         networks[SupportedNetworks.ETHEREUM_SEPOLIA] = "Ethereum Sepolia";

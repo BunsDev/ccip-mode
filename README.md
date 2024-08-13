@@ -3,8 +3,6 @@ Example demonstrating how to use CCIP on Mode blockchain.
 
 ## Chainlink CCIP Starter Kit
 
-> **Note**
->
 > _This repository represents an example of using a Chainlink product or service. It is provided to help you understand how to interact with Chainlink’s systems so that you can integrate them into your own. This template is provided "AS IS" without warranties of any kind, has not been audited, and may be missing key checks or error handling to make the usage of the product more clear. Take everything in this repository as an example and not something to be copy pasted into a production ready service._
 
 This project demonstrates a couple of basic Chainlink CCIP use cases.
@@ -39,7 +37,7 @@ forge build
 
 ![basic-architecture](./img/basic-architecture.png)
 
-With Chainlink CCIP, one can:
+**With Chainlink CCIP, one can**:
 
 - Transfer supported tokens
 - Send messages (any data)
@@ -112,7 +110,7 @@ The test files are located in the `test` folder. Note that there are two types o
   forge test --match-contract ".*ForkTest$"
   ```
 
-  **Note**: The fork tests send CCIP messages from Arbitrum Sepolia to Ethereum Sepolia, so make sure you have the _ETHEREUM_SEPOLIA_RPC_URL_ and _ARBITRUM_SEPOLIA_RPC_URL_ set in your .env file.
+  **Note**: The fork tests send CCIP messages from Mode Sepolia to Ethereum Sepolia, so make sure you have the _ETHEREUM_SEPOLIA_RPC_URL_ and _MODE_SEPOLIA_RPC_URL_ set in your .env file.
 
 ### Testnet Faucet
 

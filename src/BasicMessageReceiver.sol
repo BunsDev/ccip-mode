@@ -9,7 +9,7 @@ import {Withdraw} from "./utils/Withdraw.sol";
  * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY.
  * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
  * DO NOT USE THIS CODE IN PRODUCTION.
- */
+*/
 contract BasicMessageReceiver is CCIPReceiver, Withdraw {
     bytes32 latestMessageId;
     uint64 latestSourceChainSelector;

@@ -19,11 +19,21 @@ contract Example01ForkTest is Test {
     BurnMintERC677Helper public destinationCCIPBnMToken;
     IERC20 public sourceLinkToken;
 
+    /// @notice The BurnMintERC677Helper instance for CCIP-BnM token
+    BurnMintERC677Helper public CCIP_BNM;
+
     function setUp() public {
-        string memory DESTINATION_RPC_URL = vm.envString(
-            "ETHEREUM_SEPOLIA_RPC_URL"
-        );
-        string memory SOURCE_RPC_URL = vm.envString("ARBITRUM_SEPOLIA_RPC_URL");
+        CCIP_BNM = new BurnMintERC677Helper("CCIP-BnM", "CCIP-BnM");
+
+        // vm.makePersistent(address(CCIP_BNM));
+
+        string memory DESTINATION_RPC_URL = vm.envString("ETHEREUM_SEPOLIA_RPC_URL");
+        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL");
+        string memory SOURCE_BNM_ADDRESS = vm.envString("SOURCE_BNM_ADDRESS");
+        // string memory SOURCE_LNM_ADDRESS = vm.envString("SOURCE_LNM_ADDRESS");
+        string memory SOURCE_LINK_ADDRESS = vm.envString("SOURCE_LINK_ADDRESS");
+        string memory SOURCE_ROUTER_ADDRESS = vm.envString("SOURCE_ROUTER_ADDRESS");
+
         destinationFork = vm.createSelectFork(DESTINATION_RPC_URL);
         sourceFork = vm.createFork(SOURCE_RPC_URL);
 
@@ -42,14 +52,22 @@ contract Example01ForkTest is Test {
         destinationChainSelector = destinationNetworkDetails.chainSelector;
 
         vm.selectFork(sourceFork);
-        Register.NetworkDetails
-            memory sourceNetworkDetails = ccipLocalSimulatorFork
-                .getNetworkDetails(block.chainid);
+
+        // supportNewToken(address(SOURCE_BNM_ADDRESS));
+
         sourceCCIPBnMToken = BurnMintERC677Helper(
-            sourceNetworkDetails.ccipBnMAddress
+            // "CCIP-BnM", "CCIP-BnM"
+            // // SOURCE_BNM_ADDRESS
+            0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5
         );
-        sourceLinkToken = IERC20(sourceNetworkDetails.linkAddress);
-        sourceRouter = IRouterClient(sourceNetworkDetails.routerAddress);
+        sourceLinkToken = IERC20(
+            // SOURCE_LINK_ADDRESS
+            0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
+        );
+        sourceRouter = IRouterClient(
+            // SOURCE_ROUTER_ADDRESS
+            0xc49ec0eB4beb48B8Da4cceC51AA9A5bD0D0A4c43
+        );
     }
 
     function prepareScenario()
