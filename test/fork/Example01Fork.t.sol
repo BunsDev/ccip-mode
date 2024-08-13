@@ -19,6 +19,13 @@ contract Example01ForkTest is Test {
     BurnMintERC677Helper public destinationCCIPBnMToken;
     IERC20 public sourceLinkToken;
 
+    /// @notice The immutable register instance
+    Register immutable i_register;
+
+    /// @notice The address of the LINK faucet
+    address constant LINK_FAUCET = 0x4281eCF07378Ee595C564a59048801330f3084eE;
+
+
     /// @notice The BurnMintERC677Helper instance for CCIP-BnM token
     BurnMintERC677Helper public CCIP_BNM;
 
@@ -103,7 +110,8 @@ contract Example01ForkTest is Test {
         // forks: Mode Sepolia
         vm.selectFork(sourceFork);
         uint256 balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
-        ccipLocalSimulatorFork.requestLinkFromFaucet(alice, 10 ether);
+        // ccipLocalSimulatorFork.requestLinkFromFaucet(alice, 10 ether);
+        requestLinkFromFaucet(alice, 10 ether);
 
         vm.startPrank(alice);
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
@@ -176,5 +184,20 @@ contract Example01ForkTest is Test {
         // gets: Bob's BNM balance (after)
         uint balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
+    }
+
+    function requestLinkFromFaucet(
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
+        address linkAddress = 
+        block.chainid == 919 ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d 
+        : i_register
+            .getNetworkDetails(block.chainid)
+            .linkAddress;
+
+        vm.startPrank(LINK_FAUCET);
+        success = IERC20(linkAddress).transfer(to, amount);
+        vm.stopPrank();
     }
 }
