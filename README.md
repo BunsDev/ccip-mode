@@ -310,13 +310,13 @@ For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia
 forge script ./script/Example04.s.sol:DeployProgrammableTokenTransfers -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-2. Open Metamask and fund your contract with Native tokens. For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia, you can send 0.1 Fuji AVAX to your contract. You can also do the same thing using the `cast send` command:
+2. Open Metamask and fund your contract with Native tokens. For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia, you can send 0.1 Mode Sepolia ETH to your contract. You can also do the same thing using the `cast send` command:
 
 ```shell
 cast send <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS> --rpc-url modeSepolia --private-key=$PRIVATE_KEY --value 0.1ether
 ```
 
-3. Open Metamask and fund your contract with LINK tokens. For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia, you can send a 1 Fuji LINK to your contract. You can also do the same thing using the `cast send` command:
+3. Open Metamask and fund your contract with LINK tokens. For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia, you can send a 1 Mode Sepolia LINK to your contract. You can also do the same thing using the `cast send` command:
 
 ```shell
 cast send <LINK_TOKEN_SENDER_ADDRESS> "transfer(address,uint256)" <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS> 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
@@ -373,7 +373,7 @@ For example, if you want to send a simple cross-chain message from Mode Sepolia,
 forge script ./script/Example05.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Native Coins, either manually using your wallet or by using the `cast send` command. For example, if you want to send 0.1 Fuji AVAX, run:
+2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Native Coins, either manually using your wallet or by using the `cast send` command. For example, if you want to send 0.1 Mode Sepolia ETH, run:
 
 ```shell
 cast send <BASIC_MESSAGE_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PRIVATE_KEY --value 0.1ether
@@ -445,7 +445,7 @@ For example, if you want to send a simple cross-chain message from Mode Sepolia,
 forge script ./script/Example05.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Testnet LINKs, either manually using your wallet or by using the `cast send` command. For example, if you want to send 1 Fuji LINK, run:
+2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Testnet LINKs, either manually using your wallet or by using the `cast send` command. For example, if you want to send 1 Mode Sepolia LINK, run:
 
 ```shell
 cast send <LINK_TOKEN_SENDER_ADDRESS> "transfer(address,uint256)" <BASIC_MESSAGE_SENDER_ADDRESS> 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
@@ -551,7 +551,7 @@ forge script ./script/CrossChainNFT.s.sol:DeploySource -vvv --broadcast --rpc-ur
 
 - If you want to pay for CCIP fees in Native tokens:
 
-  Open Metamask and fund your contract with Native tokens. For example, if you want to mint from Mode Sepolia to Ethereum Sepolia, you can send 0.1 Fuji AVAX to the [`SourceMinter.sol`](./src/cross-chain-nft-minter/SourceMinter.sol) smart contract.
+  Open Metamask and fund your contract with Native tokens. For example, if you want to mint from Mode Sepolia to Ethereum Sepolia, you can send 0.1 Mode Sepolia ETH to the [`SourceMinter.sol`](./src/cross-chain-nft-minter/SourceMinter.sol) smart contract.
 
   Or, you can use the `cast send` command:
 
@@ -561,7 +561,7 @@ forge script ./script/CrossChainNFT.s.sol:DeploySource -vvv --broadcast --rpc-ur
 
 - If you want to pay for CCIP fees in LINK tokens:
 
-  Open Metamask and fund your contract with LINK tokens. For example, if you want to mint from Mode Sepolia to Ethereum Sepolia, you can send 1 Fuji LINK to the [`SourceMinter.sol`](./src/cross-chain-nft-minter/SourceMinter.sol) smart contract.
+  Open Metamask and fund your contract with LINK tokens. For example, if you want to mint from Mode Sepolia to Ethereum Sepolia, you can send 1 Mode Sepolia LINK to the [`SourceMinter.sol`](./src/cross-chain-nft-minter/SourceMinter.sol) smart contract.
 
   Or, you can use the `cast send` command:
 
