@@ -13,7 +13,8 @@ clean  :; forge clean
 remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
 # Install Libs
-install :; forge install https://github.com/foundry-rs/forge-std lib/forge-std --no-commit && forge install https://github.com/OpenZeppelin/openzeppelin-contracts lib/openzeppelin-contracts --no-commit
+install :; forge install https://github.com/foundry-rs/forge-std lib/forge-std --no-commit && forge install https://github.com/OpenZeppelin/openzeppelin-contracts lib/openzeppelin-contracts --no-commit && forge install https://github.com/smartcontractkit/ccip libs/chainlink-ccip --no-commit
+# forge install https://github.com/smartcontractkit/chainlink lib/chainlink --no-commit && forge install https://github.com/smartcontractkit/chainlink-brownie-contracts lib/chainlink-brownie-contracts --no-commit
 
 # Update Dependencies
 update:; forge update

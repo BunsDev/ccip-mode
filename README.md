@@ -154,7 +154,7 @@ function run(
 For example, if you want to send 0.0000000000000001 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in LINK, run:
 
 ```shell
-forge script ./script/Example01.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <RECEIVER_ADDRESS> <CCIP_BNM_TOKEN_SENDER_ADDRESS> 100 1
+forge script ./script/Example01.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 1
 ```
 
 ### Example 2 - Transfer Tokens from EOA to Smart Contract
@@ -189,7 +189,7 @@ function run(
 For example, if you want to send 0.0000000000000001 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in native coin (Test AVAX), run:
 
 ```shell
-forge script ./script/Example02.s.sol:CCIPTokenTransfer -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> <CCIP_BNM_TOKEN_SENDER_ADDRESS> 100 0
+forge script ./script/Example02.s.sol:CCIPTokenTransfer -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 0
 ```
 
 3. Once the CCIP message is finalized on the destination blockchain, you can see the details about the latest message using the `script/Example02.s.sol:GetLatestMessageDetails` smart contract:
@@ -209,7 +209,7 @@ forge script ./script/Example02.s.sol:GetLatestMessageDetails -vvv --broadcast -
 For example, to withdraw 100 units of CCIP-BnM previously sent, run:
 
 ```shell
-cast send <BASIC_MESSAGE_RECEIVER_ADDRESS> --rpc-url ethereumSepolia --private-key=$PRIVATE_KEY "withdrawToken(address,address)" <BENEFICIARY_ADDRESS> <CCIP_BNM_TOKEN_DESTINATION_ADDRESS>
+cast send <BASIC_MESSAGE_RECEIVER_ADDRESS> --rpc-url ethereumSepolia --private-key=$PRIVATE_KEY "withdrawToken(address,address)" <BENEFICIARY_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05
 ```
 
 ### Example 3 - Transfer Token(s) from Smart Contract to any destination
@@ -259,7 +259,7 @@ cast send <BASIC_TOKEN_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PRIV
 For example, if you want to send 0.0000000000000001 CCIP-BnM using the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) you will first need to approve that amount:
 
 ```shell
-cast send <CCIP_BNM_TOKEN_SENDER_ADDRESS> "approve(address,uint256)" <BASIC_TOKEN_SENDER_ADDRESS> 100 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
+cast send 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 "approve(address,uint256)" <BASIC_TOKEN_SENDER_ADDRESS> 100 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
 ```
 
 5. Finally, send tokens by providing the array of `Client.EVMTokenAmount {address token; uint256 amount;}` objects, using the `script/Example03.s.sol:SendBatch` smart contract:
@@ -277,7 +277,7 @@ function run(
 For example, to send CCIP-BnM token amounts you previously approved from Mode Sepolia to Ethereum Sepolia, and pay for Chainlink CCIP fees in LINK tokens, run:
 
 ```shell
-forge script ./script/Example03.s.sol:SendBatch -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,address,address,(address,uint256)[],uint8)" -- 0 <BASIC_TOKEN_SENDER_ADDRESS> <RECEIVER> "[(<CCIP_BNM_TOKEN_SENDER_ADDRESS>,100)]" 1
+forge script ./script/Example03.s.sol:SendBatch -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,address,address,(address,uint256)[],uint8)" -- 0 <BASIC_TOKEN_SENDER_ADDRESS> <RECEIVER> "[(0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05,100)]" 1
 ```
 
 6. Of course, you can always withdraw tokens you sent to the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) for fees, or from [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) if you received them there.
@@ -348,7 +348,7 @@ function run(
 For example, if you want to send a "Hello World" message alongside 100 units of CCIP-BnM from Mode Sepolia to Ethereum Sepolia, type:
 
 ```shell
-forge script ./script/Example04.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" <CCIP_BNM_TOKEN_SENDER_ADDRESS> 100
+forge script ./script/Example04.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100
 ```
 
 6. Once the CCIP message is finalized on the destination blockchain, you can see the details of the latest CCIP message received, by running the following command:
