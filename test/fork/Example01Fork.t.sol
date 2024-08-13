@@ -9,8 +9,8 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
 
 contract Example01ForkTest is Test {
     CCIPLocalSimulatorFork public ccipLocalSimulatorFork;
-    uint256 public sourceFork;
-    uint256 public destinationFork;
+    uint public sourceFork;
+    uint public destinationFork;
     address public alice;
     address public bob;
     IRouterClient public sourceRouter;
@@ -23,20 +23,14 @@ contract Example01ForkTest is Test {
     BurnMintERC677Helper public CCIP_BNM;
 
     function setUp() public {
-        CCIP_BNM = new BurnMintERC677Helper("CCIP-BnM", "CCIP-BnM");
-
-        // vm.makePersistent(address(CCIP_BNM));
-
         string memory DESTINATION_RPC_URL = vm.envString("ETHEREUM_SEPOLIA_RPC_URL");
-        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL");
-        string memory SOURCE_BNM_ADDRESS = vm.envString("SOURCE_BNM_ADDRESS");
-        // string memory SOURCE_LNM_ADDRESS = vm.envString("SOURCE_LNM_ADDRESS");
-        string memory SOURCE_LINK_ADDRESS = vm.envString("SOURCE_LINK_ADDRESS");
-        string memory SOURCE_ROUTER_ADDRESS = vm.envString("SOURCE_ROUTER_ADDRESS");
-
+        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL"); 
+        
+        // creates: forks
         destinationFork = vm.createSelectFork(DESTINATION_RPC_URL);
         sourceFork = vm.createFork(SOURCE_RPC_URL);
 
+        // creates: peers
         bob = makeAddr("bob");
         alice = makeAddr("alice");
 
@@ -49,27 +43,31 @@ contract Example01ForkTest is Test {
         destinationCCIPBnMToken = BurnMintERC677Helper(
             destinationNetworkDetails.ccipBnMAddress
         );
+  
         destinationChainSelector = destinationNetworkDetails.chainSelector;
 
+        // forks: Mode Sepolia
         vm.selectFork(sourceFork);
 
-        // supportNewToken(address(SOURCE_BNM_ADDRESS));
-
+        // creates: Source Tokens //
+        
+        // SOURCE BNM TOKEN
         sourceCCIPBnMToken = BurnMintERC677Helper(
-            // "CCIP-BnM", "CCIP-BnM"
-            // // SOURCE_BNM_ADDRESS
             0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5
         );
+        
+        // SOURCE LINK TOKEN
         sourceLinkToken = IERC20(
-            // SOURCE_LINK_ADDRESS
             0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
         );
+        
+        // creates: Source Router
         sourceRouter = IRouterClient(
-            // SOURCE_ROUTER_ADDRESS
             0xc49ec0eB4beb48B8Da4cceC51AA9A5bD0D0A4c43
         );
     }
 
+    // prepares: balances, token, amountToSend
     function prepareScenario()
         public
         returns (
@@ -93,14 +91,16 @@ contract Example01ForkTest is Test {
         vm.stopPrank();
     }
 
+    // [test] sends: tokens from EOA -> EOA | fee: LINK
     function test_transferTokensFromEoaToEoaPayFeesInLink() external {
         (
             Client.EVMTokenAmount[] memory tokensToSendDetails,
-            uint256 amountToSend
+            uint amountToSend
         ) = prepareScenario();
         vm.selectFork(destinationFork);
-        uint256 balanceOfBobBefore = destinationCCIPBnMToken.balanceOf(bob);
-
+        uint balanceOfBobBefore = destinationCCIPBnMToken.balanceOf(bob);
+        
+        // forks: Mode Sepolia
         vm.selectFork(sourceFork);
         uint256 balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
         ccipLocalSimulatorFork.requestLinkFromFaucet(alice, 10 ether);
@@ -116,29 +116,41 @@ contract Example01ForkTest is Test {
             feeToken: address(sourceLinkToken)
         });
 
-        uint256 fees = sourceRouter.getFee(destinationChainSelector, message);
+        uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceLinkToken.approve(address(sourceRouter), fees);
+        
+        // router: sends message
         sourceRouter.ccipSend(destinationChainSelector, message);
         vm.stopPrank();
-
-        uint256 balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
+        
+        // gets: balance of Alice (after)
+        uint balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
 
         ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
-        uint256 balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
+        uint balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 
+    // [test] sends: tokens from EOA -> EOA | fee: Native (ETH)
     function test_transferTokensFromEoaToEoaPayFeesInNative() external {
+    
+        // gets: tokenDetails, amountToSend
         (
             Client.EVMTokenAmount[] memory tokensToSendDetails,
-            uint256 amountToSend
+            uint amountToSend
         ) = prepareScenario();
+        
+        // forks: destination chain (Ethereum Sepolia)
         vm.selectFork(destinationFork);
+        
+        // GETS BALANCES //
+ 
+        // gets: Balance BNM balance (before)
         uint256 balanceOfBobBefore = destinationCCIPBnMToken.balanceOf(bob);
 
         vm.selectFork(sourceFork);
-        uint256 balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
+        uint balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
 
         vm.startPrank(alice);
         deal(alice, 5 ether);
@@ -153,15 +165,16 @@ contract Example01ForkTest is Test {
             feeToken: address(0)
         });
 
-        uint256 fees = sourceRouter.getFee(destinationChainSelector, message);
+        uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceRouter.ccipSend{value: fees}(destinationChainSelector, message);
         vm.stopPrank();
 
-        uint256 balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
+        uint balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
 
         ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
-        uint256 balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
+        // gets: Bob's BNM balance (after)
+        uint balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 }
