@@ -1,0 +1,10 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "no-console": "off",
+    "var-name-mixedcase": "off",
+    "compiler-version": ["warn", "^0.8.19"],
+    "quotes": "off",
+    "func-visibility": ["warn", { "ignoreConstructors": true }]
+  }
+}
