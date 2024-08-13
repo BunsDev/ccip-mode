@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
-contract MyNFT is ERC721URIStorage, Ownable {
+contract MyNFT is ERC721URIStorage, Ownable(msg.sender) {
     string constant TOKEN_URI =
         "https://ipfs.io/ipfs/QmYuKY45Aq87LeL1R5dhb1hqHLp6ZFbJaCP8jxqKM1MX6y/babe_ruth_1.json";
     uint256 internal tokenId;
