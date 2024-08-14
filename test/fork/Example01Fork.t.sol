@@ -102,7 +102,7 @@ contract ForkTest is Script, Test {
     }
 
     // [test] sends: tokens from EOA -> EOA | fee: LINK
-    function test_transfer_EOA_EOAPayFeesInLink() external {
+    function test_transfer_EOA_EOA_FeesInLink() external {
         (
             Client.EVMTokenAmount[] memory tokensToSendDetails,
             uint amountToSend
@@ -118,16 +118,11 @@ contract ForkTest is Script, Test {
         requestLinkFromFaucet(alice, 10 ether);
 
         vm.startPrank(alice);
-        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(bob),
-            data: abi.encode(""),
-            tokenAmounts: tokensToSendDetails,
-            extraArgs: Client._argsToBytes(
-                Client.EVMExtraArgsV1({gasLimit: 0})
-            ),
-            feeToken: address(sourceLinkToken)
-        });
 
+        // creates: message to send.
+         Client.EVM2AnyMessage memory message = createMessage(address(sourceLinkToken), tokensToSendDetails);
+        
+        // sends: approves LINK fees for router
         uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceLinkToken.approve(address(sourceRouter), fees);
 
@@ -135,12 +130,15 @@ contract ForkTest is Script, Test {
         sourceRouter.ccipSend(destinationChainSelector, message);
         vm.stopPrank();
 
+        // asserts: post balances are correct.
         (uint balanceOfBobAfter, uint balanceOfAliceAfter) = getPostBalances();
+        // alice spends: `amountToSend`
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
+        // bob receives: `amountToSend`
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 
-    // [test] sends: tokens from EOA -> EOA | fee: Native (ETH)
+    // [test] sends: tokens from EOA -> EOA | fee: native (ETH)
     function test_transfer_EOA_EOA_FeesInNative() external {
         // gets: tokensToSendDetails, amountToSend
         (
@@ -155,28 +153,35 @@ contract ForkTest is Script, Test {
         vm.startPrank(alice);
         deal(alice, 5 ether);
 
-        // creates: message to send
-        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(bob),
-            data: abi.encode(""),
-            tokenAmounts: tokensToSendDetails,
-            extraArgs: Client._argsToBytes(
-                Client.EVMExtraArgsV1({gasLimit: 0})
-            ),
-            feeToken: address(0)
-        });
+        // creates: message to send.
+        Client.EVM2AnyMessage memory message = createMessage(address(0), tokensToSendDetails);
 
         // sends: fees to router
         uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceRouter.ccipSend{value: fees}(destinationChainSelector, message);
         vm.stopPrank();
 
+        // asserts: post balances are correct.
         (uint balanceOfBobAfter, uint balanceOfAliceAfter) = getPostBalances();
+        // alice spends: `amountToSend`
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
+        // bob receives: `amountToSend`
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 
     // HELPER FUNCTIONS //
+
+    function createMessage(address feeToken, Client.EVMTokenAmount[] memory tokensToSendDetails) public view returns (Client.EVM2AnyMessage memory message) {
+        message = Client.EVM2AnyMessage({
+            receiver: abi.encode(bob),
+            data: abi.encode(""),
+            tokenAmounts: tokensToSendDetails,
+            extraArgs: Client._argsToBytes(
+                Client.EVMExtraArgsV1({gasLimit: 0})
+            ),
+            feeToken: feeToken
+        });
+    }
 
     // gets: BNM balances (before)
     function getPreBalances()
@@ -194,7 +199,7 @@ contract ForkTest is Script, Test {
         console.log("alice (before)", balanceAlice);
     }
     
-    // gets: BNM balances (before)
+    // gets: BNM balances (after)
     function getPostBalances()
         public
         returns (uint balanceBob, uint balanceAlice)
