@@ -25,7 +25,7 @@ contract MessageSenderTest is Test {
         destinationChainSelector = chainSelector;
     }
 
-    function test_sendAndReceiveCrossChainMessagePayFeesInNative() external {
+    function test_CrossChainMessage_FeesInNative() external {
         deal(address(sender), 1 ether);
 
         string memory messageToSend = "Hello, World!";
@@ -42,7 +42,7 @@ contract MessageSenderTest is Test {
         assertEq(latestMessage, messageToSend);
     }
 
-    function test_sendAndReceiveCrossChainMessagePayFeesInLink() external {
+    function test_CrossChainMessage_FeesInLink() external {
         ccipLocalSimulator.requestLinkFromFaucet(address(sender), 5 ether);
 
         string memory messageToSend = "Hello, World!";

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
-import "./Helper.sol";
+import "./utils/Helper.sol";
 import {BasicTokenSender} from "../src/BasicTokenSender.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 

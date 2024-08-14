@@ -39,15 +39,14 @@ contract ForkTest is Test, BaseTest {
             Client.EVMTokenAmount[] memory tokensToSendDetails,
             uint amountToSend
         ) = prepareScenario();
-        vm.selectFork(destinationFork);
 
-        // forks: Mode Sepolia
-        vm.selectFork(sourceFork);
+        // gets: pre-balances
         (uint balanceOfBobBefore, uint balanceOfAliceBefore) = getPreBalances();
 
+        // returns to source fork
         vm.selectFork(sourceFork);
 
-        requestLinkFromFaucet(alice, 10 ether);
+        requestLinkFromFaucet(alice, 10 ether, block.chainid);
 
         vm.startPrank(alice);
 
@@ -144,18 +143,4 @@ contract ForkTest is Test, BaseTest {
         console.log("bob (after)", balanceBob);
         console.log("alice (after)", balanceAlice);
     }
-
-    // // helper function: requests LINK from faucet.
-    // function requestLinkFromFaucet(
-    //     address to,
-    //     uint amount
-    // ) public returns (bool success) {
-    //     address linkAddress = block.chainid == 919
-    //         ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
-    //         : registerContract.getNetworkDetails(block.chainid).linkAddress;
-
-    //     vm.startPrank(LINK_FAUCET);
-    //     success = IERC20(linkAddress).transfer(to, amount);
-    //     vm.stopPrank();
-    // }
 }

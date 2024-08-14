@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
-import "./Helper.sol";
+import "./utils/Helper.sol";
 import {ProgrammableTokenTransfers} from "../src/ProgrammableTokenTransfers.sol";
 
 contract DeployProgrammableTokenTransfers is Script, Helper {

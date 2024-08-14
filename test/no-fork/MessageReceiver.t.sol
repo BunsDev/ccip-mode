@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import { console } from "lib/forge-std/src/Script.sol";
 import {
     CCIPLocalSimulator,
     IRouterClient,
@@ -46,13 +47,15 @@ contract MessageReceiverTest is Test {
     function test_TransferTokensFromEoaToSmartContract() external {
         ccipLocalSimulator.requestLinkFromFaucet(alice, 5 ether);
         ccipBnMToken.drip(alice);
-        uint256 balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfReceiverBefore = ccipBnMToken.balanceOf(address(basicMessageReceiver));
+        uint balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
+        console.log("balanceOfAliceBefore", balanceOfAliceBefore);
+        uint balanceOfReceiverBefore = ccipBnMToken.balanceOf(address(basicMessageReceiver));
+        console.log("balanceOfReceiverBefore", balanceOfReceiverBefore);
         assertEq(balanceOfAliceBefore, 1 ether);
 
         vm.startPrank(alice);
 
-        uint256 amount = 100;
+        uint amount = 100;
         ccipBnMToken.approve(address(router), amount);
 
         Client.EVMTokenAmount[] memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
@@ -69,15 +72,15 @@ contract MessageReceiverTest is Test {
             feeToken: address(linkToken)
         });
 
-        uint256 fees = router.getFee(destinationChainSelector, message);
+        uint fees = router.getFee(destinationChainSelector, message);
         linkToken.approve(address(router), fees);
 
         router.ccipSend(destinationChainSelector, message);
 
         vm.stopPrank();
 
-        uint256 balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfReceiverAfter = ccipBnMToken.balanceOf(address(basicMessageReceiver));
+        uint balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
+        uint balanceOfReceiverAfter = ccipBnMToken.balanceOf(address(basicMessageReceiver));
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amount);
         assertEq(balanceOfReceiverAfter, balanceOfReceiverBefore + amount);
     }
