@@ -1,7 +1,7 @@
 {
   "name": "ccip-starter-kit-foundry",
   "scripts": {
-    "test": "forge test -vvvv"
+    "test": "forge test -vvv"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",
