@@ -145,17 +145,17 @@ contract ForkTest is Test, BaseTest {
         console.log("alice (after)", balanceAlice);
     }
 
-    // helper function: requests LINK from faucet.
-    function requestLinkFromFaucet(
-        address to,
-        uint amount
-    ) public returns (bool success) {
-        address linkAddress = block.chainid == 919
-            ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
-            : registerContract.getNetworkDetails(block.chainid).linkAddress;
+    // // helper function: requests LINK from faucet.
+    // function requestLinkFromFaucet(
+    //     address to,
+    //     uint amount
+    // ) public returns (bool success) {
+    //     address linkAddress = block.chainid == 919
+    //         ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
+    //         : registerContract.getNetworkDetails(block.chainid).linkAddress;
 
-        vm.startPrank(LINK_FAUCET);
-        success = IERC20(linkAddress).transfer(to, amount);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(LINK_FAUCET);
+    //     success = IERC20(linkAddress).transfer(to, amount);
+    //     vm.stopPrank();
+    // }
 }

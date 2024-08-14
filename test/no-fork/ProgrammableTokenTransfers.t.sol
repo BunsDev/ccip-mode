@@ -7,7 +7,7 @@ import {
 } from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
 import {ProgrammableTokenTransfers} from "../../src/ProgrammableTokenTransfers.sol";
 
-contract Example04Test is Test {
+contract ProgrammableTokenTransfersTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     ProgrammableTokenTransfers public sender;
     ProgrammableTokenTransfers public receiver;

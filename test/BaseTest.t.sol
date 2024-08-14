@@ -7,6 +7,7 @@ import {CCIPLocalSimulatorFork, Register} from "@chainlink/local/src/ccip/CCIPLo
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {BurnMintERC677Helper, IERC20} from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {BasicTokenSender} from "../src/BasicTokenSender.sol";
 
 contract BaseTest is Test {
     bool private s_baseTestInitialized;
@@ -20,9 +21,11 @@ contract BaseTest is Test {
 
     IRouterClient public sourceRouter;
     uint64 public destinationChainSelector;
+    BasicTokenSender public basicTokenSender;
 
     BurnMintERC677Helper public sourceCCIPBnMToken;
     BurnMintERC677Helper public destinationCCIPBnMToken;
+    // BurnMintERC677Helper public ccipBnMToken;
 
     IERC20 public sourceLinkToken;
     address constant LINK_FAUCET = 0x4281eCF07378Ee595C564a59048801330f3084eE;
@@ -78,8 +81,24 @@ contract BaseTest is Test {
             0xc49ec0eB4beb48B8Da4cceC51AA9A5bD0D0A4c43
         );
 
+        basicTokenSender = new BasicTokenSender(address(sourceRouter), address(sourceLinkToken));
+
         // BaseTest.setUp is often called multiple times from tests' setUp due to inheritance.
         if (s_baseTestInitialized) return;
         s_baseTestInitialized = true;
   }
+
+    // helper function: requests LINK from faucet.
+    function requestLinkFromFaucet(
+        address to,
+        uint amount
+    ) public returns (bool success) {
+        address linkAddress = block.chainid == 919
+            ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
+            : registerContract.getNetworkDetails(block.chainid).linkAddress;
+
+        vm.startPrank(LINK_FAUCET);
+        success = IERC20(linkAddress).transfer(to, amount);
+        vm.stopPrank();
+    }
 }

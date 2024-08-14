@@ -6,7 +6,7 @@ import {CCIPLocalSimulator, IRouterClient, LinkToken} from "@chainlink/local/src
 import {BasicMessageSender} from "../../src/BasicMessageSender.sol";
 import {BasicMessageReceiver} from "../../src/BasicMessageReceiver.sol";
 
-contract Example06Test is Test {
+contract MessageSenderTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     BasicMessageSender public sender;
     BasicMessageReceiver public receiver;
@@ -23,6 +23,23 @@ contract Example06Test is Test {
         receiver = new BasicMessageReceiver(address(destinationRouter));
 
         destinationChainSelector = chainSelector;
+    }
+
+    function test_sendAndReceiveCrossChainMessagePayFeesInNative() external {
+        deal(address(sender), 1 ether);
+
+        string memory messageToSend = "Hello, World!";
+
+        bytes32 messageId =
+            sender.send(destinationChainSelector, address(receiver), messageToSend, BasicMessageSender.PayFeesIn.Native);
+
+        (bytes32 latestMessageId, uint64 latestSourceChainSelector, address latestSender, string memory latestMessage) =
+            receiver.getLatestMessageDetails();
+
+        assertEq(latestMessageId, messageId);
+        assertEq(latestSourceChainSelector, destinationChainSelector);
+        assertEq(latestSender, address(sender));
+        assertEq(latestMessage, messageToSend);
     }
 
     function test_sendAndReceiveCrossChainMessagePayFeesInLink() external {

@@ -11,7 +11,7 @@ import {
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {BasicTokenSender} from "../../src/BasicTokenSender.sol";
 
-contract Example03Test is Test {
+contract TokenSenderTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     BasicTokenSender public basicTokenSender;
     address public alice;

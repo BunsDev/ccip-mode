@@ -11,7 +11,7 @@ import {
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {BasicMessageReceiver} from "../../src/BasicMessageReceiver.sol";
 
-contract Example02Test is Test {
+contract MessageReceiverTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     BasicMessageReceiver public basicMessageReceiver;
     address public alice;
