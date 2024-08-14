@@ -8,27 +8,33 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import "forge-std/Script.sol";
 
-contract Example01ForkTest is Script, Test {
+contract ForkTest is Script, Test {
     CCIPLocalSimulatorFork public ccipLocalSimulatorFork;
     uint public sourceFork;
     uint public destinationFork;
+
     address public alice;
     address public bob;
+
     IRouterClient public sourceRouter;
     uint64 public destinationChainSelector;
+
     BurnMintERC677Helper public sourceCCIPBnMToken;
     BurnMintERC677Helper public destinationCCIPBnMToken;
+
     IERC20 public sourceLinkToken;
 
-    /// @notice The immutable register instance
-    Register immutable i_register;
+    /// @notice immutable register instance.
+    Register immutable registerContract;
 
-    /// @notice The address of the LINK faucet
+    /// @notice address of the LINK faucet.
     address constant LINK_FAUCET = 0x4281eCF07378Ee595C564a59048801330f3084eE;
 
     function setUp() public {
-        string memory DESTINATION_RPC_URL = vm.envString("ETHEREUM_SEPOLIA_RPC_URL");
-        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL"); 
+        string memory DESTINATION_RPC_URL = vm.envString(
+            "ETHEREUM_SEPOLIA_RPC_URL"
+        );
+        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL");
 
         // creates: forks
         destinationFork = vm.createSelectFork(DESTINATION_RPC_URL);
@@ -42,6 +48,8 @@ contract Example01ForkTest is Script, Test {
         ccipLocalSimulatorFork = new CCIPLocalSimulatorFork();
         vm.makePersistent(address(ccipLocalSimulatorFork));
 
+        // DESTINATION CONFIGURATION //
+
         // stores: destination network details
         Register.NetworkDetails
             memory destinationNetworkDetails = ccipLocalSimulatorFork
@@ -51,8 +59,9 @@ contract Example01ForkTest is Script, Test {
         );
         destinationChainSelector = destinationNetworkDetails.chainSelector;
 
-        // forks: Mode Sepolia
         vm.selectFork(sourceFork);
+
+        // DESTINATION CONFIGURATION //
 
         // SOURCE BNM TOKEN
         sourceCCIPBnMToken = BurnMintERC677Helper(
@@ -60,9 +69,7 @@ contract Example01ForkTest is Script, Test {
         );
 
         // SOURCE LINK TOKEN
-        sourceLinkToken = IERC20(
-            0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
-        );
+        sourceLinkToken = IERC20(0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d);
 
         // SOURCE ROUTER
         sourceRouter = IRouterClient(
@@ -95,17 +102,19 @@ contract Example01ForkTest is Script, Test {
     }
 
     // [test] sends: tokens from EOA -> EOA | fee: LINK
-    function test_transferTokensFromEoaToEoaPayFeesInLink() external {
+    function test_transfer_EOA_EOAPayFeesInLink() external {
         (
             Client.EVMTokenAmount[] memory tokensToSendDetails,
             uint amountToSend
         ) = prepareScenario();
         vm.selectFork(destinationFork);
-        uint balanceOfBobBefore = destinationCCIPBnMToken.balanceOf(bob);
 
         // forks: Mode Sepolia
         vm.selectFork(sourceFork);
-        uint balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
+        (uint balanceOfBobBefore, uint balanceOfAliceBefore) = getPreBalances();
+        
+        vm.selectFork(sourceFork);
+
         requestLinkFromFaucet(alice, 10 ether);
 
         vm.startPrank(alice);
@@ -126,26 +135,22 @@ contract Example01ForkTest is Script, Test {
         sourceRouter.ccipSend(destinationChainSelector, message);
         vm.stopPrank();
 
-        // gets: balance of Alice (after)
-        uint balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
+        (uint balanceOfBobAfter, uint balanceOfAliceAfter) = getPostBalances();
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
-
-        ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
-        uint balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 
     // [test] sends: tokens from EOA -> EOA | fee: Native (ETH)
-    function test_transferTokensFromEoaToEoaPayFeesInNative() external {
-    
+    function test_transfer_EOA_EOA_FeesInNative() external {
         // gets: tokensToSendDetails, amountToSend
-        (Client.EVMTokenAmount[] memory tokensToSendDetails, uint amountToSend) = prepareScenario();
- 
-        // gets: BNM balances (before)
-        vm.selectFork(destinationFork);
-        uint balanceOfBobBefore = destinationCCIPBnMToken.balanceOf(bob);
+        (
+            Client.EVMTokenAmount[] memory tokensToSendDetails,
+            uint amountToSend
+        ) = prepareScenario();
+
+        (uint balanceOfBobBefore, uint balanceOfAliceBefore) = getPreBalances();
+        
         vm.selectFork(sourceFork);
-        uint balanceOfAliceBefore = sourceCCIPBnMToken.balanceOf(alice);
 
         vm.startPrank(alice);
         deal(alice, 5 ether);
@@ -160,35 +165,56 @@ contract Example01ForkTest is Script, Test {
             ),
             feeToken: address(0)
         });
-        
+
         // sends: fees to router
         uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceRouter.ccipSend{value: fees}(destinationChainSelector, message);
         vm.stopPrank();
 
-        // gets: BNM balances (after)
-        uint balanceOfAliceAfter = sourceCCIPBnMToken.balanceOf(alice);
+        (uint balanceOfBobAfter, uint balanceOfAliceAfter) = getPostBalances();
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
-        ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
-        uint balanceOfBobAfter = destinationCCIPBnMToken.balanceOf(bob);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
+    }
 
-        console.log('before (bob)', balanceOfBobBefore);
-        console.log('before (alice)', balanceOfAliceBefore);
-        console.log('after (bob)', balanceOfBobAfter);
-        console.log('after (alice)', balanceOfAliceAfter);
+    // HELPER FUNCTIONS //
+
+    // gets: BNM balances (before)
+    function getPreBalances()
+        public
+        returns (uint balanceBob, uint balanceAlice)
+    {
+        // gets: BNM balances
+        vm.selectFork(sourceFork);
+        balanceAlice = sourceCCIPBnMToken.balanceOf(alice);
+
+        vm.selectFork(destinationFork);
+        balanceBob = destinationCCIPBnMToken.balanceOf(bob);
+
+        console.log("bob (before)", balanceBob);
+        console.log("alice (before)", balanceAlice);
     }
     
+    // gets: BNM balances (before)
+    function getPostBalances()
+        public
+        returns (uint balanceBob, uint balanceAlice)
+    {
+        balanceAlice = sourceCCIPBnMToken.balanceOf(alice);
+        ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
+        balanceBob = destinationCCIPBnMToken.balanceOf(bob);
+
+        console.log("bob (after)", balanceBob);
+        console.log("alice (after)", balanceAlice);
+    }
+
     // helper function: requests LINK from faucet.
     function requestLinkFromFaucet(
         address to,
         uint amount
     ) public returns (bool success) {
-        address linkAddress = 
-        block.chainid == 919 ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d 
-        : i_register
-            .getNetworkDetails(block.chainid)
-            .linkAddress;
+        address linkAddress = block.chainid == 919
+            ? 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d
+            : registerContract.getNetworkDetails(block.chainid).linkAddress;
 
         vm.startPrank(LINK_FAUCET);
         success = IERC20(linkAddress).transfer(to, amount);
