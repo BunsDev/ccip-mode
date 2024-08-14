@@ -134,9 +134,10 @@ Or if you want to mint 10\*\*18 units of `CCIP-BnM` test token on Mode Sepolia, 
 forge script ./script/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-### Example 1 - Transfer Tokens from EOA to EOA
+## Scripts
+### TokenTransfer: Transfer Tokens from EOA to EOA
 
-To transfer tokens from one EOA on one blockchain to another EOA on another blockchain you can use the `script/Example01.s.sol` smart contract:
+To transfer tokens from one EOA on one blockchain to another EOA on another blockchain you can use the `script/TokenTransfer.s.sol` smart contract:
 
 ```solidity
 function run(
@@ -152,26 +153,26 @@ function run(
 For example, if you want to send 0.0000000000000001 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in LINK, run:
 
 ```shell
-forge script ./script/Example01.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 1
+forge script ./script/TokenTransfer.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 1
 ```
-
-### Example 2 - Transfer Tokens from EOA to Smart Contract
+---
+### MessageReceiver: Transfer Tokens from EOA &rarr; Smart Contract
 
 To transfer tokens from EOA from the source blockchain to the smart contract on the destination blockchain, follow the next steps:
 
-1. Deploy [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) to the **destination blockchain**, using the `script/Example02.s.sol:DeployBasicMessageReceiver` smart contract:
+1. **Deploy [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol)**: to the **destination blockchain**, using the `script/MessageReceiver.s.sol:DeployBasicMessageReceiver` smart contract:
 
 ```solidity
 function run(SupportedNetworks destination) external;
 ```
 
-For example, to deploy it to Ethereum Sepolia, run:
+> ***For example**: to deploy it to Ethereum Sepolia, run the command below*
 
 ```shell
-forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
+forge script ./script/MessageReceiver.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
 ```
 
-2. Transfer tokens, from the **source blockchain** to the deployed BasicMessageReceiver smart contract using the `script/Example02.s.sol:CCIPTokenTransfer` smart contract:
+2. **Transfer Tokens**: send from the **source blockchain** to the deployed BasicMessageReceiver smart contract using the `script/MessageReceiver.s.sol:CCIPTokenTransfer` smart contract:
 
 ```solidity
 function run(
@@ -184,13 +185,12 @@ function run(
 ) external returns (bytes32 messageId);
 ```
 
-For example, if you want to send 0.0000000000000001 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in native coin (Test AVAX), run:
-
+> ***For example**: to send 0.0000000000000001 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in native coin (Test AVAX), run the command below.* 
 ```shell
-forge script ./script/Example02.s.sol:CCIPTokenTransfer -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 0
+forge script ./script/MessageReceiver.s.sol:CCIPTokenTransfer -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,uint8,address,address,uint256,uint8)" -- 2 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100 0
 ```
 
-3. Once the CCIP message is finalized on the destination blockchain, you can see the details about the latest message using the `script/Example02.s.sol:GetLatestMessageDetails` smart contract:
+3. **Get details**: once the CCIP message is finalized on the destination blockchain, you can see the details about the latest message using the `script/MessageReceiver.s.sol:GetLatestMessageDetails` smart contract:
 
 ```solidity
 function run(address basicMessageReceiver) external view;
@@ -199,7 +199,7 @@ function run(address basicMessageReceiver) external view;
 For example,
 
 ```shell
-forge script ./script/Example02.s.sol:GetLatestMessageDetails -vvv --broadcast --rpc-url ethereumSepolia --sig "run(address)" -- <BASIC_MESSAGE_RECEIVER_ADDRESS>
+forge script ./script/MessageReceiver.s.sol:GetLatestMessageDetails -vvv --broadcast --rpc-url ethereumSepolia --sig "run(address)" -- <BASIC_MESSAGE_RECEIVER_ADDRESS>
 ```
 
 4. Finally, you can always withdraw received tokens from the [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) smart contract using the `cast send` command.
@@ -214,7 +214,7 @@ cast send <BASIC_MESSAGE_RECEIVER_ADDRESS> --rpc-url ethereumSepolia --private-k
 
 To transfer a token or batch of tokens from a single, universal, smart contract to any address on the destination blockchain follow the next steps:
 
-1. Deploy [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) to the **source blockchain**, using the `script/Example03.s.sol:DeployBasicTokenSender` smart contract:
+1. Deploy [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) to the **source blockchain**, using the `script/TokenSender.s.sol:DeployBasicTokenSender` smart contract:
 
 ```solidity
 function run(SupportedNetworks source) external;
@@ -223,10 +223,10 @@ function run(SupportedNetworks source) external;
 For example, if you want to send tokens from Mode Sepolia to Ethereum Sepolia, run:
 
 ```shell
-forge script ./script/Example03.s.sol:DeployBasicTokenSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
+forge script ./script/TokenSender.s.sol:DeployBasicTokenSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-2. [OPTIONAL] If you want to send tokens to the smart contract, instead of EOA, you will need to deploy [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) to the **destination blockchain**. For this purpose, you can reuse the `script/Example02.s.sol:DeployBasicMessageReceiver` smart contract from the previous example:
+2. [OPTIONAL] If you want to send tokens to the smart contract, instead of EOA, you will need to deploy [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) to the **destination blockchain**. For this purpose, you can reuse the `script/MessageReceiver.s.sol:DeployBasicMessageReceiver` smart contract from the previous example:
 
 ```solidity
 function run(SupportedNetworks destination) external;
@@ -235,7 +235,7 @@ function run(SupportedNetworks destination) external;
 For example, to deploy it to Ethereum Sepolia, run:
 
 ```shell
-forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
+forge script ./script/MessageReceiver.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
 ```
 
 3. Fill the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) with tokens/coins for fees (you can always withdraw it later). You can do it manually from your wallet or by using the `cast send` command.
@@ -260,7 +260,7 @@ For example, if you want to send 0.0000000000000001 CCIP-BnM using the [`BasicTo
 cast send 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 "approve(address,uint256)" <BASIC_TOKEN_SENDER_ADDRESS> 100 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
 ```
 
-5. Finally, send tokens by providing the array of `Client.EVMTokenAmount {address token; uint256 amount;}` objects, using the `script/Example03.s.sol:SendBatch` smart contract:
+5. Finally, send tokens by providing the array of `Client.EVMTokenAmount {address token; uint256 amount;}` objects, using the `script/TokenSender.s.sol:SendBatch` smart contract:
 
 ```solidity
 function run(
@@ -275,7 +275,7 @@ function run(
 For example, to send CCIP-BnM token amounts you previously approved from Mode Sepolia to Ethereum Sepolia, and pay for Chainlink CCIP fees in LINK tokens, run:
 
 ```shell
-forge script ./script/Example03.s.sol:SendBatch -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,address,address,(address,uint256)[],uint8)" -- 0 <BASIC_TOKEN_SENDER_ADDRESS> <RECEIVER> "[(0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05,100)]" 1
+forge script ./script/TokenSender.s.sol:SendBatch -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,address,address,(address,uint256)[],uint8)" -- 0 <BASIC_TOKEN_SENDER_ADDRESS> <RECEIVER> "[(0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05,100)]" 1
 ```
 
 6. Of course, you can always withdraw tokens you sent to the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) for fees, or from [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) if you received them there.
@@ -296,7 +296,7 @@ cast send <CONTRACT_WITH_FUNDS_ADDRESS> --rpc-url <RPC_ENDPOINT> --private-key=$
 
 To transfer tokens and data across multiple chains, follow the next steps:
 
-1. Deploy the [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) smart contract to the **source blockchain**, using the `script/Example04.s.sol:DeployProgrammableTokenTransfers` smart contract:
+1. Deploy the [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) smart contract to the **source blockchain**, using the `script/ProgrammableTokenTransfers.s.sol:DeployProgrammableTokenTransfers` smart contract:
 
 ```solidity
 function run(SupportedNetworks network) external;
@@ -305,7 +305,7 @@ function run(SupportedNetworks network) external;
 For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia type:
 
 ```shell
-forge script ./script/Example04.s.sol:DeployProgrammableTokenTransfers -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
+forge script ./script/ProgrammableTokenTransfers.s.sol:DeployProgrammableTokenTransfers -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
 2. Open Metamask and fund your contract with Native tokens. For example, if you want to send a message from Mode Sepolia to Ethereum Sepolia, you can send 0.1 Mode Sepolia ETH to your contract. You can also do the same thing using the `cast send` command:
@@ -320,17 +320,17 @@ cast send <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS> --rpc-url modeSepolia --private
 cast send <LINK_TOKEN_SENDER_ADDRESS> "transfer(address,uint256)" <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS> 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
 ```
 
-4. Deploy the [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) smart contract to the **destination blockchain**, using the `script/Example04.s.sol:DeployProgrammableTokenTransfers` smart contract, as you did in step number one.
+4. Deploy the [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) smart contract to the **destination blockchain**, using the `script/ProgrammableTokenTransfers.s.sol:DeployProgrammableTokenTransfers` smart contract, as you did in step number one.
 
 For example, if you want to receive a message from Mode Sepolia on Ethereum Sepolia type:
 
 ```shell
-forge script ./script/Example04.s.sol:DeployProgrammableTokenTransfers -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
+forge script ./script/ProgrammableTokenTransfers.s.sol:DeployProgrammableTokenTransfers -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
 ```
 
 At this point, you have one **sender** contract on the source blockchain, and one **receiver** contract on the destination blockchain. Please note that [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) can both send & receive tokens and data, hence we have two identical instances on both source and destination blockchains.
 
-5. Send a message, using the `script/Example04.s.sol:SendTokensAndData` smart contract:
+5. Send a message, using the `script/ProgrammableTokenTransfers.s.sol:SendTokensAndData` smart contract:
 
 ```solidity
 function run(
@@ -346,7 +346,7 @@ function run(
 For example, if you want to send a "Hello World" message alongside 100 units of CCIP-BnM from Mode Sepolia to Ethereum Sepolia, type:
 
 ```shell
-forge script ./script/Example04.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100
+forge script ./script/ProgrammableTokenTransfers.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100
 ```
 
 6. Once the CCIP message is finalized on the destination blockchain, you can see the details of the latest CCIP message received, by running the following command:
@@ -359,7 +359,7 @@ cast call <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "getL
 
 To send simple Text Cross-Chain Messages and pay for CCIP fees in Native Tokens, follow the next steps:
 
-1. Deploy the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract on the **source blockchain**, using the `script/Example05.s.sol:DeployBasicMessageSender` smart contract:
+1. Deploy the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract on the **source blockchain**, using the `script/MessageSender.s.sol:DeployBasicMessageSender` smart contract:
 
 ```solidity
 function run(SupportedNetworks source) external;
@@ -368,7 +368,7 @@ function run(SupportedNetworks source) external;
 For example, if you want to send a simple cross-chain message from Mode Sepolia, run:
 
 ```shell
-forge script ./script/Example05.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
+forge script ./script/MessageSender.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
 2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Native Coins, either manually using your wallet or by using the `cast send` command. For example, if you want to send 0.1 Mode Sepolia ETH, run:
@@ -389,7 +389,7 @@ For example, to deploy it to Ethereum Sepolia, run:
 forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
 ```
 
-4. Finally, send a cross-chain message using the `script/Example05.s.sol:SendMessage` smart contract:
+4. Finally, send a cross-chain message using the `script/MessageSender.s.sol:SendMessage` smart contract:
 
 ```solidity
 function run(
@@ -404,7 +404,7 @@ function run(
 For example, if you want to send a "Hello World" message type:
 
 ```shell
-forge script ./script/Example05.s.sol:SendMessage -vvv --broadcast --rpc-url modeSepolia --sig "ru
+forge script ./script/MessageSender.s.sol:SendMessage -vvv --broadcast --rpc-url modeSepolia --sig "ru
 n(address,uint8,address,string,uint8)" -- <BASIC_MESSAGE_SENDER_ADDRESS> 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> "Hello World"
 0
 ```
@@ -431,7 +431,7 @@ cast send <BASIC_MESSAGE_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PR
 
 To send simple Text Cross-Chain Messages and pay for CCIP fees in LINK Tokens, follow the next steps:
 
-1. Deploy the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract on the **source blockchain**, using the `script/Example05.s.sol:DeployBasicMessageSender` smart contract:
+1. Deploy the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract on the **source blockchain**, using the `script/MessageSender.s.sol:DeployBasicMessageSender` smart contract:
 
 ```solidity
 function run(SupportedNetworks source) external;
@@ -440,7 +440,7 @@ function run(SupportedNetworks source) external;
 For example, if you want to send a simple cross-chain message from Mode Sepolia, run:
 
 ```shell
-forge script ./script/Example05.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
+forge script ./script/MessageSender.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
 2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Testnet LINKs, either manually using your wallet or by using the `cast send` command. For example, if you want to send 1 Mode Sepolia LINK, run:
@@ -461,7 +461,7 @@ For example, to deploy it to Ethereum Sepolia, run:
 forge script ./script/Example02.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia --sig "run(uint8)" -- 0
 ```
 
-4. Finally, send a cross-chain message using the `script/Example05.s.sol:SendMessage` smart contract:
+4. Finally, send a cross-chain message using the `script/MessageSender.s.sol:SendMessage` smart contract:
 
 ```solidity
 function run(
@@ -476,7 +476,7 @@ function run(
 For example, if you want to send a "Hello World" message type:
 
 ```shell
-forge script ./script/Example05.s.sol:SendMessage -vvv --broadcast --rpc-url modeSepolia --sig "ru
+forge script ./script/MessageSender.s.sol:SendMessage -vvv --broadcast --rpc-url modeSepolia --sig "ru
 n(address,uint8,address,string,uint8)" -- <BASIC_MESSAGE_SENDER_ADDRESS> 0 <BASIC_MESSAGE_RECEIVER_ADDRESS> "Hello World"
 1
 ```
