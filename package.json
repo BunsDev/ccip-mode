@@ -1,6 +1,7 @@
 {
   "name": "ccip-starter-kit-foundry",
   "scripts": {
+    "setup": "forge install && forge build",
     "test": "forge test -vvv"
   },
   "devDependencies": {

@@ -1,80 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Test} from "forge-std/Test.sol";
-import {CCIPLocalSimulatorFork, Register} from "@chainlink/local/src/ccip/CCIPLocalSimulatorFork.sol";
-import {BurnMintERC677Helper, IERC20} from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
-import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
-import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
-import "forge-std/Script.sol";
+import "../BaseTest.t.sol";
 
-contract ForkTest is Script, Test {
-    CCIPLocalSimulatorFork public ccipLocalSimulatorFork;
-    uint public sourceFork;
-    uint public destinationFork;
+contract ForkTest is Test, BaseTest {
 
-    address public alice;
-    address public bob;
-
-    IRouterClient public sourceRouter;
-    uint64 public destinationChainSelector;
-
-    BurnMintERC677Helper public sourceCCIPBnMToken;
-    BurnMintERC677Helper public destinationCCIPBnMToken;
-
-    IERC20 public sourceLinkToken;
-
-    /// @notice immutable register instance.
-    Register immutable registerContract;
-
-    /// @notice address of the LINK faucet.
-    address constant LINK_FAUCET = 0x4281eCF07378Ee595C564a59048801330f3084eE;
-
-    function setUp() public {
-        string memory DESTINATION_RPC_URL = vm.envString(
-            "ETHEREUM_SEPOLIA_RPC_URL"
-        );
-        string memory SOURCE_RPC_URL = vm.envString("MODE_SEPOLIA_RPC_URL");
-
-        // creates: forks
-        destinationFork = vm.createSelectFork(DESTINATION_RPC_URL);
-        sourceFork = vm.createFork(SOURCE_RPC_URL);
-
-        // creates: peers
-        bob = makeAddr("bob");
-        alice = makeAddr("alice");
-
-        // creates: CCIP Local Simulator Fork
-        ccipLocalSimulatorFork = new CCIPLocalSimulatorFork();
-        vm.makePersistent(address(ccipLocalSimulatorFork));
-
-        // DESTINATION CONFIGURATION //
-
-        // stores: destination network details
-        Register.NetworkDetails
-            memory destinationNetworkDetails = ccipLocalSimulatorFork
-                .getNetworkDetails(block.chainid);
-        destinationCCIPBnMToken = BurnMintERC677Helper(
-            destinationNetworkDetails.ccipBnMAddress
-        );
-        destinationChainSelector = destinationNetworkDetails.chainSelector;
-
-        vm.selectFork(sourceFork);
-
-        // DESTINATION CONFIGURATION //
-
-        // SOURCE BNM TOKEN
-        sourceCCIPBnMToken = BurnMintERC677Helper(
-            0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5
-        );
-
-        // SOURCE LINK TOKEN
-        sourceLinkToken = IERC20(0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d);
-
-        // SOURCE ROUTER
-        sourceRouter = IRouterClient(
-            0xc49ec0eB4beb48B8Da4cceC51AA9A5bD0D0A4c43
-        );
+    function setUp() override public {
+        BaseTest.setUp();
     }
 
     // prepares: balances, token, amountToSend
@@ -112,7 +44,7 @@ contract ForkTest is Script, Test {
         // forks: Mode Sepolia
         vm.selectFork(sourceFork);
         (uint balanceOfBobBefore, uint balanceOfAliceBefore) = getPreBalances();
-        
+
         vm.selectFork(sourceFork);
 
         requestLinkFromFaucet(alice, 10 ether);
@@ -121,7 +53,7 @@ contract ForkTest is Script, Test {
 
         // creates: message to send.
          Client.EVM2AnyMessage memory message = createMessage(address(sourceLinkToken), tokensToSendDetails);
-        
+
         // sends: approves LINK fees for router
         uint fees = sourceRouter.getFee(destinationChainSelector, message);
         sourceLinkToken.approve(address(sourceRouter), fees);
@@ -171,6 +103,7 @@ contract ForkTest is Script, Test {
 
     // HELPER FUNCTIONS //
 
+    // creates: message to send cross-chain
     function createMessage(address feeToken, Client.EVMTokenAmount[] memory tokensToSendDetails) public view returns (Client.EVM2AnyMessage memory message) {
         message = Client.EVM2AnyMessage({
             receiver: abi.encode(bob),
