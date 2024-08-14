@@ -7,30 +7,6 @@ Example demonstrating how to use CCIP on Mode blockchain.
 
 This project demonstrates a couple of basic Chainlink CCIP use cases.
 
-## Prerequisites
-
-- [Foundry](https://book.getfoundry.sh/getting-started/installation)
-
-## Getting Started
-
-1. Install packages
-
-```
-forge install
-```
-
-and
-
-```
-npm install
-```
-
-2. Compile contracts
-
-```
-forge build
-```
-
 ## What is Chainlink CCIP?
 
 **Chainlink Cross-Chain Interoperability Protocol (CCIP)** provides a single, simple, and elegant interface through which dApps and web3 entrepreneurs can securely meet all their cross-chain needs, including token transfers and arbitrary messaging.
@@ -43,56 +19,28 @@ forge build
 - Send messages (any data)
 - Send messages and tokens
 
-CCIP receiver can be:
+CCIP receiver can be either a smart contract that implements `CCIPReceiver.sol` or an EOA.
 
-- Smart contract that implements `CCIPReceiver.sol`
-- EOA
-
-**Note**: If you send a message and token(s) to EOA, only tokens will arrive
+**Note**: If you send a message and token(s) to EOA, only tokens will arrive.
 
 To use this project, you can consider CCIP as a "black-box" component and be aware of the Router contract only. If you want to dive deep into it, check the [Official Chainlink Documentation](https://docs.chain.link/ccip).
 
-## Usage
+## Getting Started
 
-In the next section you can see a couple of basic Chainlink CCIP use case examples. But before that, you need to set up some environment variables.
+In the next section you can see a couple of basic Chainlink CCIP use case examples. But before that, you need to set up some environment variables, install dependencies, setup environment variables, and compile contracts.
 
-Create a new file by copying the `.env.example` file, and name it `.env`. Fill in your wallet's PRIVATE_KEY, and RPC URLs for at least two blockchains
+### Install Packages and Compile Contracts
 
-```shell
-PRIVATE_KEY=""
-ETHEREUM_SEPOLIA_RPC_URL=""
-MODE_SEPOLIA_RPC_URL=""
+```
+    yarn && make
 ```
 
-Once that is done, to load the variables in the `.env` file, run the following command:
+### Setup Environment Variables
+- Create a new file by copying the `.env.example` file, and name it `.env`. Fill in your wallet's PRIVATE_KEY, and RPC URLs for Ethereum Sepolia and Mode Sepolia.
 
-```shell
-source .env
 ```
-
-Make yourself familiar with the [`Helper.sol`](./script/Helper.sol) smart contract. It contains all the necessary Chainlink CCIP config. If you ever need to adjust any of those parameters, go to the Helper contract.
-
-This contract also contains some enums, like `SupportedNetworks`:
-
-```solidity
-enum SupportedNetworks {
-    ETHEREUM_SEPOLIA,   // 0
-    MODE_SEPOLIA,       // 1
-}
+    cp .env.example .env
 ```
-
-This means that if you want to perform some action from `MODE_SEPOLIA` &rarr; `ETHEREUM_SEPOLIA`, for example, you'll pass `1 (uint8)` (source: Mode Sepolia) and `0 (uint8)` (destination: Ethereum Sepolia) as your blockchain flags.
-
-Similarly, there is an `PayFeesIn` enum:
-
-```solidity
-enum PayFeesIn {
-    Native,  // 0
-    LINK     // 1
-}
-```
-
-So, if you want to pay for Chainlink CCIP fees in LINK token, you will pass `1 (uint8)` as a function argument.
 
 ### Local Testing
 
@@ -110,7 +58,7 @@ The test files are located in the `test` folder. Note that there are two types o
   forge test --match-contract ".*ForkTest$"
   ```
 
-  **Note**: The fork tests send CCIP messages from Mode Sepolia to Ethereum Sepolia, so make sure you have the _ETHEREUM_SEPOLIA_RPC_URL_ and _MODE_SEPOLIA_RPC_URL_ set in your .env file.
+**Note**: The fork tests send CCIP messages from Mode Sepolia to Ethereum Sepolia, so make sure you have the _ETHEREUM_SEPOLIA_RPC_URL_ and _MODE_SEPOLIA_RPC_URL_ set in your .env file.
 
 ### Testnet Faucet
 
@@ -210,7 +158,7 @@ For example, to withdraw 100 units of CCIP-BnM previously sent, run:
 cast send <BASIC_MESSAGE_RECEIVER_ADDRESS> --rpc-url ethereumSepolia --private-key=$PRIVATE_KEY "withdrawToken(address,address)" <BENEFICIARY_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05
 ```
 
-### Example 3 - Transfer Token(s) from Smart Contract to any destination
+### TokenSender: Transfer Token(s) from Smart Contract to any destination
 
 To transfer a token or batch of tokens from a single, universal, smart contract to any address on the destination blockchain follow the next steps:
 
@@ -292,7 +240,7 @@ And to withdraw Native coins, run:
 cast send <CONTRACT_WITH_FUNDS_ADDRESS> --rpc-url <RPC_ENDPOINT> --private-key=$PRIVATE_KEY "withdraw(address)" <BENEFICIARY_ADDRESS>
 ```
 
-### Example 4 - Send & Receive Tokens and Data
+### ProgrammableTokenTransfers: Send & Receive Tokens and Data
 
 To transfer tokens and data across multiple chains, follow the next steps:
 
@@ -355,7 +303,7 @@ forge script ./script/ProgrammableTokenTransfers.s.sol:SendTokensAndData -vvv --
 cast call <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "getLastReceivedMessageDetails()" --rpc-url ethereumSepolia
 ```
 
-### Example 5 - Send & Receive Cross-Chain Messages and Pay with Native Coins
+### MessageSender: Send & Receive Cross-Chain Messages and Pay with Native Coins
 
 To send simple Text Cross-Chain Messages and pay for CCIP fees in Native Tokens, follow the next steps:
 
@@ -427,7 +375,7 @@ forge script ./script/Example02.s.sol:GetLatestMessageDetails -vvv --broadcast -
 cast send <BASIC_MESSAGE_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PRIVATE_KEY "withdraw(address)" <BENEFICIARY_ADDRESS>
 ```
 
-### Example 6 - Send & Receive Cross-Chain Messages and Pay with LINK Tokens
+### MessageSender: Send & Receive Cross-Chain Messages and Pay with LINK Tokens
 
 To send simple Text Cross-Chain Messages and pay for CCIP fees in LINK Tokens, follow the next steps:
 
@@ -502,9 +450,35 @@ cast send <BASIC_MESSAGE_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PR
 depending on whether you filled the [`SourceMinter.sol`](./src/SourceMinter.sol) contract with `Native (0)` or `LINK (1)` in step number 3.
 
 
-
 ---
 # Notes & References
+
+## Helper.sol
+Make yourself familiar with the [`Helper.sol`](./script/Helper.sol) smart contract. It contains all the necessary Chainlink CCIP config. If you ever need to adjust any of those parameters, go to the Helper contract.
+
+This contract also contains some enums, like `SupportedNetworks`:
+
+```solidity
+enum SupportedNetworks {
+    ETHEREUM_SEPOLIA,   // 0
+    MODE_SEPOLIA,       // 1
+}
+```
+
+This means that if you want to perform some action from `MODE_SEPOLIA` &rarr; `ETHEREUM_SEPOLIA`, for example, you'll pass `1 (uint8)` (source: Mode Sepolia) and `0 (uint8)` (destination: Ethereum Sepolia) as your blockchain flags.
+
+Similarly, there is an `PayFeesIn` enum:
+
+```solidity
+enum PayFeesIn {
+    Native,  // 0
+    LINK     // 1
+}
+```
+
+So, if you want to pay for Chainlink CCIP fees in LINK token, you will pass `1 (uint8)` as a function argument.
+
+## Contract Addresses
 
 <LINK_TOKEN_SENDER_ADDRESS>: 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d (LINK on Mode Sepolia) </br>
 <CCIP_BNM_TOKEN_SENDER_ADDRESS>: 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 (CCIP_BNM on Mode Sepolia)
