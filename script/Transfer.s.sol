@@ -21,58 +21,41 @@ contract CCIPTokenTransfer is Script, Helper {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
-        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
-        // uint64 SOURCE_CHAIN_ID = 829525985033418733;
+        uint64 DESTINATION_CHAIN_SELECTOR = 16015286601757825753;
 
         address TOKEN_TO_SEND_ADDRESS = vm.envAddress("SOURCE_BNM_ADDRESS");
 
         vm.startBroadcast(senderPrivateKey);
 
         IERC20(TOKEN_TO_SEND_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, amount);
-        console.log('TOKEN_TO_SEND_ADDRESS: ', TOKEN_TO_SEND_ADDRESS);
-
-        // Client.EVMTokenAmount[]
-        //     memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
-        // Client.EVMTokenAmount memory tokenToSendDetails = Client
-        //     .EVMTokenAmount({token: TOKEN_TO_SEND_ADDRESS, amount: amount});
-
-        // tokensToSendDetails[0] = tokenToSendDetails;
+        // console.log('TOKEN_TO_SEND_ADDRESS: ', TOKEN_TO_SEND_ADDRESS);
 
         Client.EVMTokenAmount[] memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
         tokensToSendDetails[0] = Client.EVMTokenAmount({
             token: address(TOKEN_TO_SEND_ADDRESS),
             amount: amount
         });
+
         // creates: message to send.
          Client.EVM2AnyMessage memory message = createMessage(address(SOURCE_LINK_ADDRESS), 
          tokensToSendDetails);
 
-        // Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-        //     receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
-        //     data: "",
-        //     tokenAmounts: tokensToSendDetails,
-        //     extraArgs: Client._argsToBytes(
-        //         Client.EVMExtraArgsV1({gasLimit: 0})
-        //     ),
-        //     feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
-        // });
-
         uint256 fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
-            DESTINATION_CHAIN_ID,
+            DESTINATION_CHAIN_SELECTOR,
             message
         );
 
-        console.log('transferFee: ', fees);
+        console.log('transferFee:', fees);
 
         if (payFeesIn == PayFeesIn.LINK) {
             IERC20(SOURCE_LINK_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, fees);
             messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend(
-                DESTINATION_CHAIN_ID,
+                DESTINATION_CHAIN_SELECTOR,
                 message
             );
         } else {
             messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend{value: fees}(
-                DESTINATION_CHAIN_ID,
+                DESTINATION_CHAIN_SELECTOR,
                 message
             );
         }

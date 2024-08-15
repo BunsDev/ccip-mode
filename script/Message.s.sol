@@ -13,37 +13,34 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 
 // MessageReceiver Script
 contract CCIPTokenTransfer is Script, Helper {
-    function run(
-        address tokenToSend,
-        uint amount,
-        PayFeesIn payFeesIn
-    ) external returns (bytes32 messageId) {
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
         uint senderPrivateKey = vm.envUint("PRIVATE_KEY");
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
         uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
+        address TOKEN_TO_SEND_ADDRESS = vm.envAddress("SOURCE_BNM_ADDRESS");
+
+    function run(
+        uint amount,
+        PayFeesIn payFeesIn
+    ) external returns (bytes32 messageId) {
 
         // note: this is a deployed contract.
-        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
 
         vm.startBroadcast(senderPrivateKey);
 
-        IERC20(tokenToSend).approve(SOURCE_ROUTER_ADDRESS, amount);
+        IERC20(TOKEN_TO_SEND_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, amount);
+        console.log('TOKEN_TO_SEND_ADDRESS: ', TOKEN_TO_SEND_ADDRESS);
 
-        Client.EVMTokenAmount[]
-            memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
-        Client.EVMTokenAmount memory tokenToSendDetails = Client
-            .EVMTokenAmount({token: tokenToSend, amount: amount});
-
-        tokensToSendDetails[0] = tokenToSendDetails;
-
-        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
-            data: "",
-            tokenAmounts: tokensToSendDetails,
-            extraArgs: "",
-            feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
+        Client.EVMTokenAmount[] memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
+        tokensToSendDetails[0] = Client.EVMTokenAmount({
+            token: address(TOKEN_TO_SEND_ADDRESS),
+            amount: amount
         });
+
+        // creates: message to send.
+         Client.EVM2AnyMessage memory message = createMessage(address(SOURCE_LINK_ADDRESS), 
+         tokensToSendDetails);
 
         uint fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
             DESTINATION_CHAIN_ID,
@@ -64,11 +61,26 @@ contract CCIPTokenTransfer is Script, Helper {
         }
 
         console.log(
-            "You can now monitor the status of your Chainlink CCIP Message via: https://ccip.chain.link/msg/"
+            "You can now monitor the status of your Chainlink CCIP Message via https://ccip.chain.link using CCIP Message ID: "
         );
         console.logBytes32(messageId);
 
         vm.stopBroadcast();
+    }
+
+    // HELPER FUNCTIONS //
+
+    // creates: message to send cross-chain
+    function createMessage(address feeToken, Client.EVMTokenAmount[] memory tokensToSendDetails) public view returns (Client.EVM2AnyMessage memory message) {
+        message = Client.EVM2AnyMessage({
+            receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
+            data: abi.encode(""),
+            tokenAmounts: tokensToSendDetails,
+            extraArgs: Client._argsToBytes(
+                Client.EVMExtraArgsV1({gasLimit: 0})
+            ),
+            feeToken: feeToken
+        });
     }
 }
 

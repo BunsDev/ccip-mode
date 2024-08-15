@@ -12,18 +12,23 @@ contract SendTokensAndData is Script, Helper {
         uint amount
     ) external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
+        uint64 DESTINATION_CHAIN_SELECTOR = 16015286601757825753;
+        // console.log("DESTINATION_CHAIN_SELECTOR: ", DESTINATION_CHAIN_SELECTOR);
 
         // note: this is a deployed contract.
-        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+        address DESTINATION_PROGRAMMABLE_TOKENS_ADDRESS = vm.envAddress("DESTINATION_PROGRAMMABLE_TOKENS_ADDRESS");
+        // console.log("DESTINATION_PROGRAMMABLE_TOKENS_ADDRESS: ", DESTINATION_PROGRAMMABLE_TOKENS_ADDRESS);
+
         // note: this is a deployed contract.
-        address payable MESSAGE_SENDER_ADDRESS = payable(vm.envAddress("MESSAGE_SENDER_ADDRESS"));
+        address payable SOURCE_PROGRAMMABLE_TOKENS_ADDRESS = payable(vm.envAddress("SOURCE_PROGRAMMABLE_TOKENS_ADDRESS"));
+        // console.log("SOURCE_PROGRAMMABLE_TOKENS_ADDRESS: ", SOURCE_PROGRAMMABLE_TOKENS_ADDRESS);
 
         vm.startBroadcast(deployerPrivateKey);
+        console.log('Broadcast transaction...');
 
-        bytes32 messageId = ProgrammableTokenTransfers(MESSAGE_SENDER_ADDRESS).sendMessage(
-            DESTINATION_CHAIN_ID,
-            MESSAGE_RECEIVER_ADDRESS,
+        bytes32 messageId = ProgrammableTokenTransfers(SOURCE_PROGRAMMABLE_TOKENS_ADDRESS).sendMessage(
+            DESTINATION_CHAIN_SELECTOR,
+            DESTINATION_PROGRAMMABLE_TOKENS_ADDRESS,
             message,
             token,
             amount
