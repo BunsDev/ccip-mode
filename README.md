@@ -57,7 +57,7 @@ yarn deploy
 - [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol)
 - [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol)
 
-## [.DONE.] Acquire Test Tokens from Faucet
+## Acquire Test Tokens from Faucet
 In order to proceed with transferring tokens, you must first acquire test tokens from your source chain.  The command below, calls a faucet drip function to acquire `ccipBnm` -- also `ccipLnm`, when [transacting on an Ethereum network](https://docs.chain.link/ccip/supported-networks/v1_2_0/testnet#ethereum-sepolia-mode-sepolia):
 
 ```shell
