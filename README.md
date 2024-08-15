@@ -44,7 +44,7 @@ source .env
 
 # Setup Scenario
 
-## [.DONE.] Deploy Contracts
+## Deploy Contracts
 In order to interact with our contracts, we first need to deploy them, which is simplified in the [`script/Deploy.s.sol`](./script/Deploy.s.sol) smart contract. 
 
 We have package scripts that enable you to deploy contracts, as follows:
@@ -64,7 +64,7 @@ In order to proceed with transferring tokens, you must first acquire test tokens
 forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(bool)" -- false
 ```
 
-## [.SKIP.] Load Contracts with Test Tokens
+## Load Contracts with Test Tokens
 
 After acquiring testnet tokens, you will proceed with funding your [Message Sender Contract](./src/BasicMessageSender.sol) and [Programmable Tokens Contract](./src/ProgrammableTokenTransfers.sol). 
 
@@ -72,7 +72,7 @@ After acquiring testnet tokens, you will proceed with funding your [Message Send
 
 - **LINK Funding**: the following commands will send **1 LINK** to the contracts deployed on your source (Mode Sepolia) and destination (Ethereum Sepolia).
 
-#### [.SKIP.] Fund Message Sender Contract
+#### Fund Message Sender Contract
 **with 0.1 Native (ETH)**
 ```shell
 cast send 0x0cd2E31eb378110DDD62778E136ba664A624b1CA --rpc-url modeSepolia --value 0.1ether --interactive
@@ -83,7 +83,7 @@ cast send 0x0cd2E31eb378110DDD62778E136ba664A624b1CA --rpc-url modeSepolia --val
 cast send 0x925a4bfE64AE2bFAC8a02b35F78e60C29743755d "transfer(address,uint256)"  0x0cd2E31eb378110DDD62778E136ba664A624b1CA 1000000000000000000 --rpc-url modeSepolia --interactive
 ``` 
 
-#### [.SKIP.] Fund Programmable Tokens Contracts
+#### Fund Programmable Tokens Contracts
 **with 0.1 Native (ETH)**
 ```shell
 cast send 0xF8b6eB96f2af79515fCce984c3e4fc8392e59645 --rpc-url modeSepolia --value 0.1ether --interactive && cast send 0x3fcCfFD821cd4Eab20FBb86EEc6cD22D5D237C87 --rpc-url ethereumSepolia --value 0.1ether --interactive
@@ -102,7 +102,7 @@ cast send 0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5 "transfer(address,uint256)"
 ## Scenarios
 > *Before proceeding with this section, please ensure you have completed the steps outlined in the [Setup for Scenario](#setup-for-scenario) section above.*
 
-### [.DONE.] Scenario 1: Transfer Tokens
+### Scenario 1: Transfer Tokens
 - **1A | Transfer Tokens**: transfer tokens from one EOA on one blockchain to another EOA on another blockchain you can use the `script/Transfer.s.sol` smart contract. 
 
     - Run the following to send 1 CCIP-BnM from Mode Sepolia to Ethereum Sepolia and to pay for CCIP fees in LINK:
@@ -110,27 +110,27 @@ cast send 0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5 "transfer(address,uint256)"
         forge script ./script/Transfer.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint256,uint8)" -- 1000000000000000000 1
         ```
 
-### [...] Scenario 2: Send Message
+### Scenario 2: Send Message
 
-- **2A | [.DONE.] Transfer Tokens**: run the following to send `1 CCIP-BnM` from Mode Sepolia &rarr; Ethereum Sepolia (fee in LINK):
+- **2A | Transfer Tokens**: run the following to send `1 CCIP-BnM` from Mode Sepolia &rarr; Ethereum Sepolia (fee in LINK):
 
     ```shell
     forge script ./script/Message.s.sol:CCIPTokenTransfer -vvv --broadcast --rpc-url modeSepolia --sig "run(uint256,uint8)" -- 1000000000000000000 1
     ```
 
-- **2B | [.DONE.] Send Cross-Chain Message**: run the following to send "Hello World" as a message:
+- **2B | Send Cross-Chain Message**: run the following to send "Hello World" as a message:
 
     ```shell
     forge script ./script/Message.s.sol:SendMessage -vvv --broadcast --rpc-url modeSepolia --sig "run(string,uint8)" -- "Hello World" 0
     ```
 
-- **2C | [.DONE.] Get Details**: once the CCIP message is finalized on the destination blockchain, you can see the details about the latest message using the `script/Message.s.sol:GetLatestMessageDetails` smart contract.
+- **2C | Get Details**: once the CCIP message is finalized on the destination blockchain, you can see the details about the latest message using the `script/Message.s.sol:GetLatestMessageDetails` smart contract.
 
     ```shell
     forge script ./script/Message.s.sol:GetLatestMessageDetails -vvv --broadcast --rpc-url ethereumSepolia --sig "run()"
     ```
 
-- **2D | [.SKIP.] Withdraw Tokens**: finally, you can always withdraw received tokens from the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) and  [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) via `cast send` command. 
+- **2D | Withdraw Tokens**: finally, you can always withdraw received tokens from the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) and  [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) via `cast send` command. 
 
     - **Message Sender**: you can always withdraw tokens for Chainlink CCIP fees, as follows.
 
@@ -144,7 +144,7 @@ cast send 0xB9d4e1141E67ECFedC8A8139b5229b7FF2BF16F5 "transfer(address,uint256)"
         cast send 0x3161Ba019494a04b73B28193E43dC9d5733465f4 --rpc-url ethereumSepolia "withdrawToken(address,address)" 0x7D5498EE4d080396408Bd727A03Cff8C12d9d713 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05
         ```
 
-### [.DONE.] Scenario 3: Program Tokens
+### Scenario 3: Program Tokens
 Our final scenario involves programmable tokens. These enable you to send & receive tokens that contain code that instructs them with code to execute once they are received.
 
 At this point, you have one **sender** contract on the source blockchain, and one **receiver** contract on the destination blockchain. Please note that [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) can both send & receive tokens and data, hence we have two identical instances on both source and destination blockchains.
