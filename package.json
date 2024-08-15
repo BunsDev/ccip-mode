@@ -2,7 +2,10 @@
   "name": "ccip-starter-kit-foundry",
   "scripts": {
     "setup": "forge install && forge build",
-    "test": "forge test -vvv"
+    "test": "forge test -vvv",
+    "deploy:mReceiver": "forge script ./script/Deploy.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia",
+    "deploy:mSender": "forge script ./script/Deploy.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia",
+    "deploy:pTokens": "forge script ./script/Deploy.s.sol:DeployProgrammableTokens -vvv --broadcast --rpc-url modeSepolia"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",
