@@ -8,20 +8,21 @@ import {ProgrammableTokenTransfers} from "../src/ProgrammableTokenTransfers.sol"
 contract SendTokensAndData is Script, Helper {
     function run(
         address payable sender,
-        SupportedNetworks destination,
-        address receiver,
         string memory message,
         address token,
-        uint256 amount
+        uint amount
     ) external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
+        
+        // note: this is a deployed contract.
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
         vm.startBroadcast(deployerPrivateKey);
 
-        (, , , uint64 destinationChainId) = getConfigFromNetwork(destination);
-
         bytes32 messageId = ProgrammableTokenTransfers(sender).sendMessage(
-            destinationChainId,
-            receiver,
+            DESTINATION_CHAIN_ID,
+            MESSAGE_RECEIVER_ADDRESS,
             message,
             token,
             amount

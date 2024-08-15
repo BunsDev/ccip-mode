@@ -15,14 +15,14 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 contract CCIPTokenTransfer is Script, Helper {
     function run(
         address tokenToSend,
-        uint256 amount,
+        uint amount,
         PayFeesIn payFeesIn
     ) external returns (bytes32 messageId) {
-        uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint senderPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(senderPrivateKey);
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
-        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
+        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
 
         // note: this is a deployed contract.
         address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
@@ -41,16 +41,16 @@ contract CCIPTokenTransfer is Script, Helper {
             data: "",
             tokenAmounts: tokensToSendDetails,
             extraArgs: "",
-            feeToken: payFeesIn == PayFeesIn.LINK ? linkToken : address(0)
+            feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
         });
 
-        uint256 fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
+        uint fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
             DESTINATION_CHAIN_ID,
             message
         );
 
         if (payFeesIn == PayFeesIn.LINK) {
-            IERC20(linkToken).approve(SOURCE_ROUTER_ADDRESS, fees);
+            IERC20(SOURCE_LINK_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, fees);
             messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend(
                 DESTINATION_CHAIN_ID,
                 message
@@ -99,14 +99,15 @@ contract GetLatestMessageDetails is Script, Helper {
 contract SendMessage is Script, Helper {
     function run(
         address payable sender,
-        SupportedNetworks destination,
         address receiver,
         string memory message,
         BasicMessageSender.PayFeesIn payFeesIn
     ) external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
+        vm.startBroadcast(deployerPrivateKey);
 
         bytes32 messageId = BasicMessageSender(sender).send(
             DESTINATION_CHAIN_ID,

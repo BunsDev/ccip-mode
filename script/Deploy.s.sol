@@ -33,30 +33,6 @@ contract DeployTokenSender is Script, Helper {
     }
 }
 
-contract DeployMessageReceiver is Script, Helper {
-    function run() external {
-        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address DESTINATION_ROUTER_ADDRESS = vm.envAddress("DESTINATION_ROUTER_ADDRESS");
-        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
-
-        vm.startBroadcast(deployerPrivateKey);
-
-        // deploys: BasicMessageReceiver
-        BasicMessageReceiver basicMessageReceiver = new BasicMessageReceiver(
-            DESTINATION_ROUTER_ADDRESS
-        );
-
-        console.log(
-            "Message Receiver deployed on chainId: ",
-            DESTINATION_CHAIN_ID,
-            "with address: ",
-            address(basicMessageReceiver)
-        );
-
-        vm.stopBroadcast();
-    }
-}
-
 contract DeployMessageSender is Script, Helper {
     uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
@@ -77,6 +53,30 @@ contract DeployMessageSender is Script, Helper {
             SOURCE_CHAIN_ID,
             "with address: ",
             address(basicMessageSender)
+        );
+
+        vm.stopBroadcast();
+    }
+}
+
+contract DeployMessageReceiver is Script, Helper {
+    function run() external {
+        uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address DESTINATION_ROUTER_ADDRESS = vm.envAddress("DESTINATION_ROUTER_ADDRESS");
+        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploys: BasicMessageReceiver
+        BasicMessageReceiver basicMessageReceiver = new BasicMessageReceiver(
+            DESTINATION_ROUTER_ADDRESS
+        );
+
+        console.log(
+            "Message Receiver deployed on chainId: ",
+            DESTINATION_CHAIN_ID,
+            "with address: ",
+            address(basicMessageReceiver)
         );
 
         vm.stopBroadcast();

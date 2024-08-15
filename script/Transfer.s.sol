@@ -8,6 +8,12 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol";
 
 contract CCIPTokenTransfer is Script, Helper {
+    // uint64 constant chainIdEthereumSepolia = 16015286601757825753;
+    // uint64 constant chainIdModeSepolia = 829525985033418733;
+
+    // note: this is a deployed contract.
+    address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
     function run(
         uint256 amount,
         PayFeesIn payFeesIn
@@ -15,37 +21,48 @@ contract CCIPTokenTransfer is Script, Helper {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
-        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
-        uint TOKEN_TO_SEND_ADDRESS = vm.envUint("DESTINATION_BNM_ADDRESS");
+        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
+        // uint64 SOURCE_CHAIN_ID = 829525985033418733;
 
-        // note: this is a deployed contract.
-        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+        address TOKEN_TO_SEND_ADDRESS = vm.envAddress("SOURCE_BNM_ADDRESS");
 
         vm.startBroadcast(senderPrivateKey);
 
         IERC20(TOKEN_TO_SEND_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, amount);
+        console.log('TOKEN_TO_SEND_ADDRESS: ', TOKEN_TO_SEND_ADDRESS);
 
-        Client.EVMTokenAmount[]
-            memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
-        Client.EVMTokenAmount memory tokenToSendDetails = Client
-            .EVMTokenAmount({token: TOKEN_TO_SEND_ADDRESS, amount: amount});
+        // Client.EVMTokenAmount[]
+        //     memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
+        // Client.EVMTokenAmount memory tokenToSendDetails = Client
+        //     .EVMTokenAmount({token: TOKEN_TO_SEND_ADDRESS, amount: amount});
 
-        tokensToSendDetails[0] = tokenToSendDetails;
+        // tokensToSendDetails[0] = tokenToSendDetails;
 
-        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(receiver),
-            data: "",
-            tokenAmounts: tokensToSendDetails,
-            extraArgs: Client._argsToBytes(
-                Client.EVMExtraArgsV1({gasLimit: 0})
-            ),
-            feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
+        Client.EVMTokenAmount[] memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
+        tokensToSendDetails[0] = Client.EVMTokenAmount({
+            token: address(TOKEN_TO_SEND_ADDRESS),
+            amount: amount
         });
+        // creates: message to send.
+         Client.EVM2AnyMessage memory message = createMessage(address(SOURCE_LINK_ADDRESS), 
+         tokensToSendDetails);
+
+        // Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
+        //     receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
+        //     data: "",
+        //     tokenAmounts: tokensToSendDetails,
+        //     extraArgs: Client._argsToBytes(
+        //         Client.EVMExtraArgsV1({gasLimit: 0})
+        //     ),
+        //     feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
+        // });
 
         uint256 fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
             DESTINATION_CHAIN_ID,
             message
         );
+
+        console.log('transferFee: ', fees);
 
         if (payFeesIn == PayFeesIn.LINK) {
             IERC20(SOURCE_LINK_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, fees);
@@ -66,5 +83,20 @@ contract CCIPTokenTransfer is Script, Helper {
         console.logBytes32(messageId);
 
         vm.stopBroadcast();
+    }
+
+    // HELPER FUNCTIONS //
+
+    // creates: message to send cross-chain
+    function createMessage(address feeToken, Client.EVMTokenAmount[] memory tokensToSendDetails) public view returns (Client.EVM2AnyMessage memory message) {
+        message = Client.EVM2AnyMessage({
+            receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
+            data: abi.encode(""),
+            tokenAmounts: tokensToSendDetails,
+            extraArgs: Client._argsToBytes(
+                Client.EVMExtraArgsV1({gasLimit: 0})
+            ),
+            feeToken: feeToken
+        });
     }
 }
