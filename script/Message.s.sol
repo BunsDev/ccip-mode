@@ -14,22 +14,20 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 // MessageReceiver Script
 contract CCIPTokenTransfer is Script, Helper {
     function run(
-        SupportedNetworks source,
-        SupportedNetworks destination,
-        address basicMessageReceiver,
         address tokenToSend,
         uint256 amount,
         PayFeesIn payFeesIn
     ) external returns (bytes32 messageId) {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(senderPrivateKey);
+        address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
+        address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
+        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
 
-        (address sourceRouter, address linkToken, , ) = getConfigFromNetwork(
-            source
-        );
-        (, , , uint64 destinationChainId) = getConfigFromNetwork(destination);
+        // note: this is a deployed contract.
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
 
-        IERC20(tokenToSend).approve(sourceRouter, amount);
+        IERC20(tokenToSend).approve(SOURCE_ROUTER_ADDRESS, amount);
 
         Client.EVMTokenAmount[]
             memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
@@ -39,27 +37,27 @@ contract CCIPTokenTransfer is Script, Helper {
         tokensToSendDetails[0] = tokenToSendDetails;
 
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(basicMessageReceiver),
+            receiver: abi.encode(MESSAGE_RECEIVER_ADDRESS),
             data: "",
             tokenAmounts: tokensToSendDetails,
             extraArgs: "",
             feeToken: payFeesIn == PayFeesIn.LINK ? linkToken : address(0)
         });
 
-        uint256 fees = IRouterClient(sourceRouter).getFee(
-            destinationChainId,
+        uint256 fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
+            DESTINATION_CHAIN_ID,
             message
         );
 
         if (payFeesIn == PayFeesIn.LINK) {
-            IERC20(linkToken).approve(sourceRouter, fees);
-            messageId = IRouterClient(sourceRouter).ccipSend(
-                destinationChainId,
+            IERC20(linkToken).approve(SOURCE_ROUTER_ADDRESS, fees);
+            messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend(
+                DESTINATION_CHAIN_ID,
                 message
             );
         } else {
-            messageId = IRouterClient(sourceRouter).ccipSend{value: fees}(
-                destinationChainId,
+            messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend{value: fees}(
+                DESTINATION_CHAIN_ID,
                 message
             );
         }
@@ -75,13 +73,16 @@ contract CCIPTokenTransfer is Script, Helper {
 
 // MessageReceiver Script
 contract GetLatestMessageDetails is Script, Helper {
-    function run(address basicMessageReceiver) external view {
+    function run() external view {
+        // note: this is a deployed contract.
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
         (
             bytes32 latestMessageId,
             uint64 latestSourceChainSelector,
             address latestSender,
             string memory latestMessage
-        ) = BasicMessageReceiver(basicMessageReceiver).getLatestMessageDetails();
+        ) = BasicMessageReceiver(MESSAGE_RECEIVER_ADDRESS).getLatestMessageDetails();
 
         console.log("Latest Message ID: ");
         console.logBytes32(latestMessageId);
@@ -105,11 +106,10 @@ contract SendMessage is Script, Helper {
     ) external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-
-        (, , , uint64 destinationChainId) = getConfigFromNetwork(destination);
+        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
 
         bytes32 messageId = BasicMessageSender(sender).send(
-            destinationChainId,
+            DESTINATION_CHAIN_ID,
             receiver,
             message,
             payFeesIn

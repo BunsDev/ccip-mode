@@ -3,9 +3,12 @@
   "scripts": {
     "setup": "forge install && forge build",
     "test": "forge test -vvv",
-    "deploy:mReceiver": "forge script ./script/Deploy.s.sol:DeployBasicMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia",
-    "deploy:mSender": "forge script ./script/Deploy.s.sol:DeployBasicMessageSender -vvv --broadcast --rpc-url modeSepolia",
-    "deploy:pTokens": "forge script ./script/Deploy.s.sol:DeployProgrammableTokens -vvv --broadcast --rpc-url modeSepolia"
+    "deploy:tSender": "forge script ./script/Deploy.s.sol:DeployTokenSender -vvv --broadcast --rpc-url modeSepolia",
+    "deploy:mReceiver": "forge script ./script/Deploy.s.sol:DeployMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia",
+    "deploy:mSender": "forge script ./script/Deploy.s.sol:DeployMessageSender -vvv --broadcast --rpc-url modeSepolia",
+    "deploy:pTokens": "forge script ./script/Deploy.s.sol:DeployProgrammableTokens -vvv --broadcast --rpc-url modeSepolia",
+
+    "transfer": "forge script ./script/Transfer.s.sol -vvv --broadcast --rpc-url modeSepolia --sig \"run(uint256,uint8)\" -- 100 1"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",

@@ -8,7 +8,7 @@ import {Helper} from "./utils/Helper.sol";
 import {ProgrammableTokenTransfers} from "../src/ProgrammableTokenTransfers.sol";
 import {BasicTokenSender} from "../src/BasicTokenSender.sol";
 
-contract DeployBasicTokenSender is Script, Helper {
+contract DeployTokenSender is Script, Helper {
     function run() external {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
@@ -33,7 +33,7 @@ contract DeployBasicTokenSender is Script, Helper {
     }
 }
 
-contract DeployBasicMessageReceiver is Script, Helper {
+contract DeployMessageReceiver is Script, Helper {
     function run() external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address DESTINATION_ROUTER_ADDRESS = vm.envAddress("DESTINATION_ROUTER_ADDRESS");
@@ -57,7 +57,7 @@ contract DeployBasicMessageReceiver is Script, Helper {
     }
 }
 
-contract DeployBasicMessageSender is Script, Helper {
+contract DeployMessageSender is Script, Helper {
     uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
     address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");

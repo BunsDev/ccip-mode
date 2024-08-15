@@ -51,3 +51,21 @@ Or if you want to mint 10\*\*18 units of `CCIP-BnM` test token on Mode Sepolia, 
 ```shell
 forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
+
+---
+
+### Local Testing
+
+The test files are located in the `test` folder. Note that there are two types of tests:
+
+- **Test with [CCIPLocalSimulator](https://github.com/smartcontractkit/chainlink-local/blob/main/src/ccip/CCIPLocalSimulator.sol)**: These tests are used to test the CCIP functionality in your local environment. They are located in the `test/no-fork` folder. To run these tests, run the following command:
+
+  ```shell
+  forge test --no-match-contract ".*ForkTest$"
+  ```
+
+- **Test with [CCIPLocalSimulatorFork](https://github.com/smartcontractkit/chainlink-local/blob/main/src/ccip/CCIPLocalSimulatorFork.sol)**: These tests are used to test the CCIP functionality in a forked environment. They are located in the test/fork folder. To run these tests, run the following command:
+
+  ```shell
+  forge test --match-contract ".*ForkTest$"
+  ```

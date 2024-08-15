@@ -9,27 +9,26 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 
 contract CCIPTokenTransfer is Script, Helper {
     function run(
-        SupportedNetworks source,
-        SupportedNetworks destination,
-        address receiver,
-        address tokenToSend,
         uint256 amount,
         PayFeesIn payFeesIn
     ) external returns (bytes32 messageId) {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
+        address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
+        address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
+        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
+        uint TOKEN_TO_SEND_ADDRESS = vm.envUint("DESTINATION_BNM_ADDRESS");
+
+        // note: this is a deployed contract.
+        address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
         vm.startBroadcast(senderPrivateKey);
 
-        (address sourceRouter, address linkToken, , ) = getConfigFromNetwork(
-            source
-        );
-        (, , , uint64 destinationChainId) = getConfigFromNetwork(destination);
-
-        IERC20(tokenToSend).approve(sourceRouter, amount);
+        IERC20(TOKEN_TO_SEND_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, amount);
 
         Client.EVMTokenAmount[]
             memory tokensToSendDetails = new Client.EVMTokenAmount[](1);
         Client.EVMTokenAmount memory tokenToSendDetails = Client
-            .EVMTokenAmount({token: tokenToSend, amount: amount});
+            .EVMTokenAmount({token: TOKEN_TO_SEND_ADDRESS, amount: amount});
 
         tokensToSendDetails[0] = tokenToSendDetails;
 
@@ -40,23 +39,23 @@ contract CCIPTokenTransfer is Script, Helper {
             extraArgs: Client._argsToBytes(
                 Client.EVMExtraArgsV1({gasLimit: 0})
             ),
-            feeToken: payFeesIn == PayFeesIn.LINK ? linkToken : address(0)
+            feeToken: payFeesIn == PayFeesIn.LINK ? SOURCE_LINK_ADDRESS : address(0)
         });
 
-        uint256 fees = IRouterClient(sourceRouter).getFee(
-            destinationChainId,
+        uint256 fees = IRouterClient(SOURCE_ROUTER_ADDRESS).getFee(
+            DESTINATION_CHAIN_ID,
             message
         );
 
         if (payFeesIn == PayFeesIn.LINK) {
-            IERC20(linkToken).approve(sourceRouter, fees);
-            messageId = IRouterClient(sourceRouter).ccipSend(
-                destinationChainId,
+            IERC20(SOURCE_LINK_ADDRESS).approve(SOURCE_ROUTER_ADDRESS, fees);
+            messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend(
+                DESTINATION_CHAIN_ID,
                 message
             );
         } else {
-            messageId = IRouterClient(sourceRouter).ccipSend{value: fees}(
-                destinationChainId,
+            messageId = IRouterClient(SOURCE_ROUTER_ADDRESS).ccipSend{value: fees}(
+                DESTINATION_CHAIN_ID,
                 message
             );
         }
