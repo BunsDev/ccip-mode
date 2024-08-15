@@ -19,13 +19,14 @@ contract CCIPTokenTransfer is Script, Helper {
         PayFeesIn payFeesIn
     ) external returns (bytes32 messageId) {
         uint senderPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(senderPrivateKey);
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");
         uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
 
         // note: this is a deployed contract.
         address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+
+        vm.startBroadcast(senderPrivateKey);
 
         IERC20(tokenToSend).approve(SOURCE_ROUTER_ADDRESS, amount);
 
@@ -98,17 +99,20 @@ contract GetLatestMessageDetails is Script, Helper {
 // MessageSender Script
 contract SendMessage is Script, Helper {
     function run(
-        address payable sender,
         string memory message,
         BasicMessageSender.PayFeesIn payFeesIn
     ) external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
+
+        // note: this is a deployed contract.
         address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
+        // note: this is a deployed contract.
+        address payable MESSAGE_SENDER_ADDRESS = vm.envAddress("MESSAGE_SENDER_ADDRESS");
 
         vm.startBroadcast(deployerPrivateKey);
 
-        bytes32 messageId = BasicMessageSender(sender).send(
+        bytes32 messageId = BasicMessageSender(MESSAGE_SENDER_ADDRESS).send(
             DESTINATION_CHAIN_ID,
             MESSAGE_RECEIVER_ADDRESS,
             message,

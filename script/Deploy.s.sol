@@ -23,9 +23,9 @@ contract DeployTokenSender is Script, Helper {
         );
 
         console.log(
-            "Token Sender deployed on chainId: ",
+            "Token Sender deployed on chainId:",
             SOURCE_CHAIN_ID,
-            "with address: ",
+            "with address:",
             address(basicTokenSender)
         );
 
@@ -40,7 +40,6 @@ contract DeployMessageSender is Script, Helper {
     uint SOURCE_CHAIN_ID = vm.envUint("SOURCE_CHAIN_ID");
 
     function run() external {
-
         vm.startBroadcast(deployerPrivateKey);
 
         BasicMessageSender basicMessageSender = new BasicMessageSender(
@@ -49,9 +48,9 @@ contract DeployMessageSender is Script, Helper {
         );
 
         console.log(
-            "Message Sender deployed on chainId: ",
+            "Message Sender deployed on chainId:",
             SOURCE_CHAIN_ID,
-            "with address: ",
+            "with address:",
             address(basicMessageSender)
         );
 
@@ -62,7 +61,9 @@ contract DeployMessageSender is Script, Helper {
 contract DeployMessageReceiver is Script, Helper {
     function run() external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address DESTINATION_ROUTER_ADDRESS = vm.envAddress("DESTINATION_ROUTER_ADDRESS");
+        address DESTINATION_ROUTER_ADDRESS = vm.envAddress(
+            "DESTINATION_ROUTER_ADDRESS"
+        );
         uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
 
         vm.startBroadcast(deployerPrivateKey);
@@ -84,22 +85,26 @@ contract DeployMessageReceiver is Script, Helper {
 }
 
 contract DeployProgrammableTokens is Script, Helper {
-    function run() external {
+    function run(bool isEthereum) external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
-        uint SOURCE_CHAIN_ID = vm.envUint("SOURCE_CHAIN_ID");
+        address ROUTER_ADDRESS = isEthereum
+            ? vm.envAddress("SOURCE_ROUTER_ADDRESS")
+            : vm.envAddress("DESTINATION_ROUTER_ADDRESS");
+        uint CHAIN_ID = isEthereum
+            ? vm.envUint("DESTINATION_CHAIN_ID")
+            : vm.envUint("SOURCE_CHAIN_ID");
 
         vm.startBroadcast(deployerPrivateKey);
 
         // deploys: ProgrammableTokenTransfers on Mode Sepolia (source chain).
         ProgrammableTokenTransfers programmableTokenTransfers = new ProgrammableTokenTransfers(
-                SOURCE_ROUTER_ADDRESS
-        );
+                ROUTER_ADDRESS
+            );
 
         console.log(
-            "ProgrammableTokens contract deployed on chainId: ",
-            SOURCE_CHAIN_ID,
-            "with address: ",
+            "Programmable Tokens deployed on chainId:",
+            CHAIN_ID,
+            "with address:",
             address(programmableTokenTransfers)
         );
 
