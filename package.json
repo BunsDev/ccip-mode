@@ -1,5 +1,5 @@
 {
-  "name": "ccip-starter-kit-foundry",
+  "name": "ccip-mode",
   "scripts": {
     "setup": "forge install && forge build",
     "test": "forge test -vvv",
