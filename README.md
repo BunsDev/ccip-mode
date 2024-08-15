@@ -48,7 +48,7 @@ Cast enables you to interact directly with a blockchain. Setup your wallet, usin
 cast wallet address --interactive
 ```
 
-## Setup for Scenario
+## Setup Scenario
 
 ### Deploy Contracts
 In order to interact with our contracts, we first need to deploy them, which is simplified in the [`script/Deploy.s.sol`](./script/Deploy.s.sol) smart contract. 
@@ -63,7 +63,7 @@ yarn deploy
 - [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol)
 - [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol)
 
-### Use Faucet for Test Tokens
+### Acquire Test Tokens from Faucet
 In order to proceed with transferring tokens, you must first acquire test tokens from your source chain.  The command below, calls a faucet drip function to acquire `ccipBnm` -- also `ccipLnm`, when [transacting on an Ethereum network](https://docs.chain.link/ccip/supported-networks/v1_2_0/testnet#ethereum-sepolia-mode-sepolia):
 
 ```shell
@@ -72,14 +72,16 @@ forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia 
 
 ### Load Contracts with Test Tokens
 
-After acquiring testnet tokens, you will proceed with funding them.
-
-Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Native Coins, either manually using your wallet or by using the `cast send` command. For example, if you want to send 0.1 Mode Sepolia ETH to your MessageSender, run:
+After acquiring testnet tokens, you will proceed with funding your [Message Sender Contract](./src/BasicMessageSender.sol) and [Programmable Tokens Contract](./src/ProgrammableTokenTransfers.sol). The following commands will send 0.1 native tokens (ETH) to the contracts deployed on your source chain (Mode Sepolia).
 
 ```shell
-cast send <MESSAGE_SENDER_ADDRESS> --rpc-url modeSepolia --value 0.1ether
+cast send $MESSAGE_SENDER_ADDRESS --rpc-url modeSepolia --value 0.1ether && cast send $PROGRAMMABLE_TOKENS_ADDRESS --rpc-url modeSepolia --value 0.1ether
 ```
 
+Fund your `Programmable Tokens Contract` with LINK on your source chain (Mode Sepolia) as follows:
+```shell
+cast send $SOURCE_LINK_ADDRESS "transfer(address,uint256)" $PROGRAMMABLE_TOKENS_ADDRESS 1000000000000000000 --rpc-url modeSepolia
+```
 
 ## Scenarios
 > *Before proceeding with this section, please ensure you have completed the steps outlined in the [Setup for Scenario](#setup-for-scenario) section above.*
@@ -118,78 +120,13 @@ forge script ./script/Message.s.sol:GetLatestMessageDetails -vvv --broadcast --r
 cast send <MESSAGE_RECEIVER_ADDRESS> --rpc-url ethereumSepolia "withdrawToken(address,address)" <BENEFICIARY_ADDRESS> 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05
 ```
 
-### Scenario 3: Program Tokens
-
+### [...] Scenario 3: Program Tokens
+Our final scenario involves programmable tokens. These enable you to send & receive tokens that contain code that instructs them with code to execute once they are received.
 
 ---
-### 2. Message - Receive: Transfer Tokens from EOA &rarr; Smart Contract
 
+### 
 
-
-
-
-### TokenSender: Transfer Token(s) from Smart Contract
-
-To transfer a token or batch of tokens from a single, universal, smart contract to any address on the destination blockchain follow the next steps:
-
-1. Fill the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) with tokens/coins for fees (you can always withdraw it later). You can do it manually from your wallet or by using the `cast send` command. For example, if you want to pay for Chainlink CCIP Fees in LINK tokens, you can fill the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) smart contract with 1 Mode Sepolia LINK by running:
-
-```shell
-cast send <SOURCE_LINK_ADDRESS> "transfer(address,uint256)" <TOKEN_SENDER_ADDRESS> 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
-```
-
-Or, if you want to pay for Chainlink CCIP Fees in Native coins, you can fill the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) smart contract with 0.1 Mode Sepolia ETH by running:
-
-```shell
-cast send <TOKEN_SENDER_ADDRESS> --rpc-url modeSepolia --private-key=$PRIVATE_KEY --value 0.1ether
-```
-
-4. For each token you want to send, you will need to approve the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) to spend it on your behalf, by using the `cast send` command.
-
-For example, if you want to send 0.0000000000000001 CCIP-BnM using the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) you will first need to approve that amount:
-
-```shell
-cast send 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 "approve(address,uint256)" <BASIC_TOKEN_SENDER_ADDRESS> 100 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
-```
-
-5. Finally, send tokens by providing the array of `Client.EVMTokenAmount {address token; uint256 amount;}` objects, using the `script/Send.s.sol:SendBatch` smart contract.
-
-For example, to send CCIP-BnM token amounts you previously approved from Mode Sepolia to Ethereum Sepolia, and pay for Chainlink CCIP fees in LINK tokens, run:
-
-```shell
-forge script ./script/Send.s.sol:SendBatch -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8,address,address,(address,uint256)[],uint8)" -- 0 <BASIC_TOKEN_SENDER_ADDRESS> <RECEIVER> "[(0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05,100)]" 1
-```
-
-6. Of course, you can always withdraw tokens you sent to the [`BasicTokenSender.sol`](./src/BasicTokenSender.sol) for fees, or from [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol) if you received them there.
-
-For example, to withdraw ERC20 tokens, run:
-
-```shell
-cast send <CONTRACT_WITH_FUNDS_ADDRESS> --rpc-url <RPC_ENDPOINT> --private-key=$PRIVATE_KEY "withdrawToken(address,address)" <BENEFICIARY_ADDRESS> <TOKEN_TO_WITHDRAW_ADDRESS>
-```
-
-And to withdraw Native coins, run:
-
-```shell
-cast send <CONTRACT_WITH_FUNDS_ADDRESS> --rpc-url <RPC_ENDPOINT> --private-key=$PRIVATE_KEY "withdraw(address)" <BENEFICIARY_ADDRESS>
-```
-
-### Program: Send & Receive Tokens and Data
-- Transfer tokens and data across multiple chains.
-
-1. **Deploy [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol)**: to the **source blockchain**, using the `script/Deploy.s.sol:DeployProgrammableTokens` smart contract:
-2. **Fund Contract** (to deployed contract)
-    - The example below demonstrates how you can send 0.1 Mode Sepolia ETH to your contract.
-```shell
-cast send <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS> --rpc-url modeSepolia --private-key=$PRIVATE_KEY --value 0.1ether
-```
-    - Send Mode Sepolia LINK to your contract via another `cast send` command:
-
-```shell
-cast send $SOURCE_LINK_ADDRESS "transfer(address,uint256)" $PROGRAMMABLE_TOKENS_ADDRESS 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY
-```
-
-4. Deploy the [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) smart contract to the **destination blockchain**, using the `script/Deploy.s.sol:DeployProgrammableTokens` smart contract, as you did in step number one (todo: `--sig "run(uint8)" -- 0`)
 
 At this point, you have one **sender** contract on the source blockchain, and one **receiver** contract on the destination blockchain. Please note that [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol) can both send & receive tokens and data, hence we have two identical instances on both source and destination blockchains.
 
@@ -198,13 +135,13 @@ At this point, you have one **sender** contract on the source blockchain, and on
 For example, if you want to send a "Hello World" message alongside 100 units of CCIP-BnM from Mode Sepolia to Ethereum Sepolia, type:
 
 ```shell
-forge script ./script/Program.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100
+forge script ./script/Program.s.sol:SendTokensAndData -vvv --broadcast --rpc-url modeSepolia --sig "run(address,uint8,address,string,address,uint256)" -- <PROGRAMMABLE_TOKENS_ADDRESS_ON_SOURCE_BLOCKCHAIN> 0 <PROGRAMMABLE_TOKENS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "Hello World" 0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05 100
 ```
 
 6. Once the CCIP message is finalized on the destination blockchain, you can see the details of the latest CCIP message received, by running the following command:
 
 ```shell
-cast call <PROGRAMMABLE_TOKEN_TRANSFERS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "getLastReceivedMessageDetails()" --rpc-url ethereumSepolia
+cast call <PROGRAMMABLE_TOKENS_ADDRESS_ON_DESTINATION_BLOCKCHAIN> "getLastReceivedMessageDetails()" --rpc-url ethereumSepolia
 ```
 
 ### MessageSender: Send & Receive Cross-Chain Messages and Pay with Native Coins
@@ -285,7 +222,7 @@ For example, if you want to send a simple cross-chain message from Mode Sepolia,
 forge script ./script/Message.s.sol:DeployMessageSender -vvv --broadcast --rpc-url modeSepolia --sig "run(uint8)" -- 2
 ```
 
-2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Testnet LINKs, either manually using your wallet or by using the `cast send` command. For example, if you want to send 1 Mode Sepolia LINK, run:
+2. Fund the [`BasicMessageSender.sol`](./src/BasicMessageSender.sol) smart contract with Testnet LINKs, via `cast send` command. For example, if you want to send 1 Mode Sepolia LINK, run:
 
 ```shell
 cast send <LINK_TOKEN_SENDER_ADDRESS> "transfer(address,uint256)" <MESSAGE_SENDER_ADDRESS> 1000000000000000000 --rpc-url modeSepolia --private-key=$PRIVATE_KEY

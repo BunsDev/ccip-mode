@@ -63,7 +63,7 @@ contract CCIPTokenTransfer is Script, Helper {
         }
 
         console.log(
-            "You can now monitor the status of your Chainlink CCIP Message via https://ccip.chain.link using CCIP Message ID: "
+            "You can now monitor the status of your Chainlink CCIP Message via: https://ccip.chain.link/msg/"
         );
         console.logBytes32(messageId);
 
@@ -99,19 +99,18 @@ contract GetLatestMessageDetails is Script, Helper {
 contract SendMessage is Script, Helper {
     function run(
         address payable sender,
-        address receiver,
         string memory message,
         BasicMessageSender.PayFeesIn payFeesIn
     ) external {
         uint deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        uint DESTINATION_CHAIN_ID = vm.envUint("DESTINATION_CHAIN_ID");
+        uint64 DESTINATION_CHAIN_ID = 16015286601757825753;
         address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
 
         vm.startBroadcast(deployerPrivateKey);
 
         bytes32 messageId = BasicMessageSender(sender).send(
             DESTINATION_CHAIN_ID,
-            receiver,
+            MESSAGE_RECEIVER_ADDRESS,
             message,
             payFeesIn
         );

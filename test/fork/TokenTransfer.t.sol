@@ -52,7 +52,7 @@ contract ForkTest is Test, BaseForkTest {
         vm.startPrank(alice);
 
         // creates: message to send.
-         Client.EVM2AnyMessage memory message = createMessage(address(sourceLinkToken), tokensToSendDetails);
+        Client.EVM2AnyMessage memory message = createMessage(address(sourceLinkToken), tokensToSendDetails);
 
         // sends: approves LINK fees for router
         uint fees = sourceRouter.getFee(destinationChainSelector, message);
