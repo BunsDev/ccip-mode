@@ -2,12 +2,13 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/Script.sol";
 import {
     CCIPLocalSimulator, IRouterClient, BurnMintERC677Helper
 } from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
 import {ProgrammableTokenTransfers} from "../../src/ProgrammableTokenTransfers.sol";
 
-contract ProgrammableTokenTransfersTest is Test {
+contract ProgramTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     ProgrammableTokenTransfers public sender;
     ProgrammableTokenTransfers public receiver;
@@ -27,15 +28,15 @@ contract ProgrammableTokenTransfersTest is Test {
         ccipBnMToken = ccipBnM;
     }
 
-    function test_programmableTokenTransfers() external {
+    function test_programmableTokens() external {
         deal(address(sender), 1 ether);
         ccipBnMToken.drip(address(sender));
 
-        uint256 balanceOfSenderBefore = ccipBnMToken.balanceOf(address(sender));
-        uint256 balanceOfReceiverBefore = ccipBnMToken.balanceOf(address(receiver));
+        uint balanceOfSenderBefore = ccipBnMToken.balanceOf(address(sender));
+        uint balanceOfReceiverBefore = ccipBnMToken.balanceOf(address(receiver));
 
         string memory messageToSend = "Hello, World!";
-        uint256 amountToSend = 100;
+        uint amountToSend = 1 ether;
 
         bytes32 messageId = sender.sendMessage(
             destinationChainSelector, address(receiver), messageToSend, address(ccipBnMToken), amountToSend
@@ -47,11 +48,13 @@ contract ProgrammableTokenTransfersTest is Test {
             address latestMessageSender,
             string memory latestMessage,
             address latestMessageToken,
-            uint256 latestMessageAmount
+            uint latestMessageAmount
         ) = receiver.getLastReceivedMessageDetails();
 
-        uint256 balanceOfSenderAfter = ccipBnMToken.balanceOf(address(sender));
-        uint256 balanceOfReceiverAfter = ccipBnMToken.balanceOf(address(receiver));
+        uint balanceOfSenderAfter = ccipBnMToken.balanceOf(address(sender));
+        uint balanceOfReceiverAfter = ccipBnMToken.balanceOf(address(receiver));
+        console.log("Sender: ", balanceOfSenderBefore / 1e18, "->", balanceOfSenderAfter / 1e18);
+        console.log("Receiver: ", balanceOfReceiverAfter / 1e18, "->", balanceOfReceiverAfter / 1e18);
 
         assertEq(latestMessageId, messageId);
         assertEq(latestMessageSourceChainSelector, destinationChainSelector);

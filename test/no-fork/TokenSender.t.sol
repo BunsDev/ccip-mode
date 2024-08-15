@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/Script.sol";
 import {
     CCIPLocalSimulator,
     IRouterClient,
@@ -11,7 +12,7 @@ import {
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {BasicTokenSender} from "../../src/BasicTokenSender.sol";
 
-contract TokenSenderTest is Test {
+contract SendTest is Test {
     CCIPLocalSimulator public ccipLocalSimulator;
     BasicTokenSender public basicTokenSender;
     address public alice;
@@ -37,13 +38,13 @@ contract TokenSenderTest is Test {
 
     function prepareScenario()
         public
-        returns (Client.EVMTokenAmount[] memory tokensToSendDetails, uint256 amountToSend)
+        returns (Client.EVMTokenAmount[] memory tokensToSendDetails, uint amountToSend)
     {
         vm.startPrank(alice);
 
         ccipBnMToken.drip(alice);
 
-        amountToSend = 100;
+        amountToSend = 1 ether;
         ccipBnMToken.approve(address(basicTokenSender), amountToSend);
 
         tokensToSendDetails = new Client.EVMTokenAmount[](1);
@@ -55,36 +56,39 @@ contract TokenSenderTest is Test {
     }
 
     function test_transferTokensFromSmartContractAndPayFeesInLink() external {
-        (Client.EVMTokenAmount[] memory tokensToSendDetails, uint256 amountToSend) = prepareScenario();
+        (Client.EVMTokenAmount[] memory tokensToSendDetails, uint amountToSend) = prepareScenario();
 
-        uint256 balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfBobBefore = ccipBnMToken.balanceOf(bob);
+        uint balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
+        uint balanceOfBobBefore = ccipBnMToken.balanceOf(bob);
 
         vm.startPrank(alice);
         ccipLocalSimulator.requestLinkFromFaucet(address(basicTokenSender), 5 ether);
         basicTokenSender.send(destinationChainSelector, bob, tokensToSendDetails, BasicTokenSender.PayFeesIn.LINK);
         vm.stopPrank();
 
-        uint256 balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfBobAfter = ccipBnMToken.balanceOf(bob);
+        uint balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
+        uint balanceOfBobAfter = ccipBnMToken.balanceOf(bob);
+
+        console.log("Bob: ", balanceOfBobBefore / 1e18, "->", balanceOfBobAfter / 1e18);
+        console.log("Alice: ", balanceOfAliceBefore / 1e18, "->", balanceOfAliceAfter / 1e18);
 
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);
     }
 
     function test_transferTokensFromSmartContractAndPayFeesInNative() external {
-        (Client.EVMTokenAmount[] memory tokensToSendDetails, uint256 amountToSend) = prepareScenario();
+        (Client.EVMTokenAmount[] memory tokensToSendDetails, uint amountToSend) = prepareScenario();
 
-        uint256 balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfBobBefore = ccipBnMToken.balanceOf(bob);
+        uint balanceOfAliceBefore = ccipBnMToken.balanceOf(alice);
+        uint balanceOfBobBefore = ccipBnMToken.balanceOf(bob);
 
         vm.startPrank(alice);
         deal(address(basicTokenSender), 5 ether);
         basicTokenSender.send(destinationChainSelector, bob, tokensToSendDetails, BasicTokenSender.PayFeesIn.Native);
         vm.stopPrank();
 
-        uint256 balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
-        uint256 balanceOfBobAfter = ccipBnMToken.balanceOf(bob);
+        uint balanceOfAliceAfter = ccipBnMToken.balanceOf(alice);
+        uint balanceOfBobAfter = ccipBnMToken.balanceOf(bob);
 
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
         assertEq(balanceOfBobAfter, balanceOfBobBefore + amountToSend);

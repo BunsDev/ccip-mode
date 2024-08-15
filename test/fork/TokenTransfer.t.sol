@@ -22,7 +22,7 @@ contract ForkTest is Test, BaseForkTest {
         vm.startPrank(alice);
         sourceCCIPBnMToken.drip(alice);
 
-        amountToSend = 100;
+        amountToSend = 1 ether;
         sourceCCIPBnMToken.approve(address(sourceRouter), amountToSend);
 
         tokensToSendDetails = new Client.EVMTokenAmount[](1);
@@ -95,6 +95,10 @@ contract ForkTest is Test, BaseForkTest {
 
         // asserts: post balances are correct.
         (uint balanceOfBobAfter, uint balanceOfAliceAfter) = getPostBalances();
+
+        console.log("Bob: ", balanceOfBobBefore / 1e18, "->", balanceOfBobAfter / 1e18);
+        console.log("Alice: ", balanceOfAliceBefore / 1e18, "->", balanceOfAliceAfter / 1e18);
+
         // alice spends: `amountToSend`
         assertEq(balanceOfAliceAfter, balanceOfAliceBefore - amountToSend);
         // bob receives: `amountToSend`
@@ -128,8 +132,7 @@ contract ForkTest is Test, BaseForkTest {
         vm.selectFork(destinationFork);
         balanceBob = destinationCCIPBnMToken.balanceOf(bob);
 
-        console.log("bob (before)", balanceBob);
-        console.log("alice (before)", balanceAlice);
+
     }
     
     // gets: BNM balances (after)
@@ -140,8 +143,5 @@ contract ForkTest is Test, BaseForkTest {
         balanceAlice = sourceCCIPBnMToken.balanceOf(alice);
         ccipLocalSimulatorFork.switchChainAndRouteMessage(destinationFork);
         balanceBob = destinationCCIPBnMToken.balanceOf(bob);
-
-        console.log("bob (after)", balanceBob);
-        console.log("alice (after)", balanceAlice);
     }
 }

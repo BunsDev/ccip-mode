@@ -173,7 +173,7 @@ And to withdraw Native coins, run:
 cast send <CONTRACT_WITH_FUNDS_ADDRESS> --rpc-url <RPC_ENDPOINT> --private-key=$PRIVATE_KEY "withdraw(address)" <BENEFICIARY_ADDRESS>
 ```
 
-### ProgrammableTokenTransfers: Send & Receive Tokens and Data
+### Program: Send & Receive Tokens and Data
 
 To transfer tokens and data across multiple chains, follow the next steps:
 
