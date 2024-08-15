@@ -48,6 +48,11 @@ Cast enables you to interact directly with a blockchain. Setup your wallet, usin
 cast wallet address --interactive
 ```
 
+### Fill up with Test Tokens
+```shell
+forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia --sig "run(bool)" -- false
+```
+
 ## Scenarios
     
     1. Transfer Tokens
@@ -60,10 +65,12 @@ In order to interact with our contracts, we first need to deploy them, which is 
 We have package scripts that enable you to deploy contracts, as follows:
 
 ```shell
-deploy:deploy:mReceiver && deploy:mSender && deploy:pTokens
+yarn deploy
 ```
-- [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol)
 - [`BasicTokenSender.sol`](./src/BasicTokenSender.sol)
+- [`BasicMessageSender.sol`](./src/BasicMessageSender.sol)
+- [`BasicMessageReceiver.sol`](./src/BasicMessageReceiver.sol)
+- [`ProgrammableTokenTransfers.sol`](./src/ProgrammableTokenTransfers.sol)
 
 ### [...] 1. Transfer Tokens: from EOA &rarr; EOA
 

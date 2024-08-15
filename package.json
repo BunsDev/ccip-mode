@@ -3,6 +3,7 @@
   "scripts": {
     "setup": "forge install && forge build",
     "test": "forge test -vvv",
+    "deploy": "yarn deploy:tSender && yarn deploy:mSender && yarn deploy:mReceiver && yarn deploy:pTokens", 
     "deploy:tSender": "forge script ./script/Deploy.s.sol:DeployTokenSender -vvv --broadcast --rpc-url modeSepolia",
     "deploy:mReceiver": "forge script ./script/Deploy.s.sol:DeployMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia",
     "deploy:mSender": "forge script ./script/Deploy.s.sol:DeployMessageSender -vvv --broadcast --rpc-url modeSepolia",
