@@ -17,7 +17,7 @@ contract SendTokensAndData is Script, Helper {
         // note: this is a deployed contract.
         address MESSAGE_RECEIVER_ADDRESS = vm.envAddress("MESSAGE_RECEIVER_ADDRESS");
         // note: this is a deployed contract.
-        address payable MESSAGE_SENDER_ADDRESS = vm.envAddress("MESSAGE_SENDER_ADDRESS");
+        address payable MESSAGE_SENDER_ADDRESS = payable(vm.envAddress("MESSAGE_SENDER_ADDRESS"));
 
         vm.startBroadcast(deployerPrivateKey);
 
