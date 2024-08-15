@@ -10,7 +10,11 @@
     "deploy:pSender": "forge script ./script/Deploy.s.sol:DeployProgrammableTokens -vvv --broadcast --rpc-url modeSepolia --sig \"run(bool)\" -- true",
     "deploy:pReceiver": "forge script ./script/Deploy.s.sol:DeployProgrammableTokens -vvv --broadcast --rpc-url ethereumSepolia --sig \"run(bool)\" -- true",
 
-    "transfer": "forge script ./script/Transfer.s.sol -vvv --broadcast --rpc-url modeSepolia --sig \"run(uint256,uint8)\" -- 100 1"
+    "transfer": "forge script ./script/Transfer.s.sol -vvv --broadcast --rpc-url modeSepolia --sig \"run(uint256,uint8)\" -- 100 1",
+    "drip": "yarn drip:mode && yarn drip:eth",
+
+    "drip:mode": "forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url modeSepolia --sig \"run(bool)\" -- false",
+    "drip:eth": "forge script ./script/utils/Faucet.s.sol -vvv --broadcast --rpc-url ethereumSepolia --sig \"run(bool)\" -- true"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",
