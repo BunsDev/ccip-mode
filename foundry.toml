@@ -5,9 +5,10 @@ libs = ['node_modules', 'lib']
 remappings = [
     '@chainlink/contracts/=node_modules/@chainlink/contracts',
     '@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip',
-    '@chainlink/local=node_modules/@chainlink/local',
-    'forge-std/=lib/forge-std/src',
-    '@chainlink/=node_modules/@chainlink/'
+    
+    '@chainlink/local/=node_modules/@chainlink/local',
+    '@chainlink/=node_modules/@chainlink',
+    'forge-std/=lib/forge-std/src'
 ]
 
 # solc = '0.8.19'

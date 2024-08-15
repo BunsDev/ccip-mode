@@ -1,47 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Test} from "forge-std/Test.sol";
-import { console } from "lib/forge-std/src/Script.sol";
-import {
-    CCIPLocalSimulator,
-    IRouterClient,
-    LinkToken,
-    BurnMintERC677Helper
-} from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
-import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
-import {BasicMessageReceiver} from "../../src/BasicMessageReceiver.sol";
+// import {Test} from "forge-std/Test.sol";
+import { console } from "forge-std/Script.sol";
+// import {
+//     CCIPLocalSimulator,
+//     IRouterClient,
+//     LinkToken,
+//     BurnMintERC677Helper
+// } from "@chainlink/local/src/ccip/CCIPLocalSimulator.sol";
+import {Client} from "node_modules/@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+// import {BasicMessageReceiver} from "../../src/BasicMessageReceiver.sol";
+import {BaseTest} from "../BaseTest.t.sol";
 
-contract MessageReceiverTest is Test {
-    CCIPLocalSimulator public ccipLocalSimulator;
-    BasicMessageReceiver public basicMessageReceiver;
-    address public alice;
+contract MessageReceiverTest is BaseTest {
 
-    IRouterClient public router;
-    uint64 public destinationChainSelector;
-    BurnMintERC677Helper public ccipBnMToken;
-    LinkToken public linkToken;
+    function setUp() public override {
+        BaseTest.setUp();
 
-    function setUp() public {
-        ccipLocalSimulator = new CCIPLocalSimulator();
-
-        (
-            uint64 chainSelector,
-            IRouterClient sourceRouter,
-            IRouterClient destinationRouter,
-            ,
-            LinkToken link,
-            BurnMintERC677Helper ccipBnM,
-        ) = ccipLocalSimulator.configuration();
-
-        router = sourceRouter;
-        destinationChainSelector = chainSelector;
-        ccipBnMToken = ccipBnM;
-        linkToken = link;
-
-        basicMessageReceiver = new BasicMessageReceiver(address(destinationRouter));
-
-        alice = makeAddr("alice");
     }
 
     function test_TransferTokensFromEoaToSmartContract() external {

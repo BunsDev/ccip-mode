@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "forge-std/Script.sol";
+import {console, Script} from "forge-std/Script.sol";
 import {BasicMessageReceiver} from "../src/BasicMessageReceiver.sol";
 import {BasicMessageSender} from "../src/BasicMessageSender.sol";
 import {Helper} from "./utils/Helper.sol";
 import {ProgrammableTokenTransfers} from "../src/ProgrammableTokenTransfers.sol";
-
+import {BasicTokenSender} from "../src/BasicTokenSender.sol";
 
 contract DeployBasicTokenSender is Script, Helper {
-    function run(SupportedNetworks source) external {
+    function run() external {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
         address SOURCE_ROUTER_ADDRESS = vm.envAddress("SOURCE_ROUTER_ADDRESS");
         address SOURCE_LINK_ADDRESS = vm.envAddress("SOURCE_LINK_ADDRESS");

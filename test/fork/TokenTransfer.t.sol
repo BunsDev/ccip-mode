@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../BaseTest.t.sol";
+import "../BaseForkTest.t.sol";
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 
-contract ForkTest is Test, BaseTest {
+contract ForkTest is Test, BaseForkTest {
 
     function setUp() override public {
-        BaseTest.setUp();
+        BaseForkTest.setUp();
     }
 
     // prepares: balances, token, amountToSend
