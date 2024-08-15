@@ -42,12 +42,6 @@ After filling out your `.env`, run the following:
 source .env
 ```
 
-### C. Cast Interactive Setup
-Cast enables you to interact directly with a blockchain. Setup your wallet, using the following command: 
-```shell
-cast wallet address --interactive
-```
-
 # Setup Scenario
 
 ## [.DONE.] Deploy Contracts
