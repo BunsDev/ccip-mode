@@ -54,7 +54,7 @@ contract ProgramTest is Test {
         uint balanceOfSenderAfter = ccipBnMToken.balanceOf(address(sender));
         uint balanceOfReceiverAfter = ccipBnMToken.balanceOf(address(receiver));
         console.log("Sender: ", balanceOfSenderBefore / 1e18, "->", balanceOfSenderAfter / 1e18);
-        console.log("Receiver: ", balanceOfReceiverAfter / 1e18, "->", balanceOfReceiverAfter / 1e18);
+        console.log("Receiver: ", balanceOfReceiverBefore / 1e18, "->", balanceOfReceiverAfter / 1e18);
 
         assertEq(latestMessageId, messageId);
         assertEq(latestMessageSourceChainSelector, destinationChainSelector);
