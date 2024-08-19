@@ -2,7 +2,7 @@
   "name": "ccip-mode",
   "scripts": {
     "setup": "forge install && forge build",
-    "test": "forge test -vvv",
+    "test": "forge test -vvvv",
     "deploy": "yarn deploy:tSender && yarn deploy:mSender && yarn deploy:mReceiver && yarn deploy:pSender && yarn deploy:pReceiver && yarn deploy:pSender && yarn deploy:pReceiver", 
     "deploy:tSender": "forge script ./script/Deploy.s.sol:DeployTokenSender -vvv --broadcast --rpc-url modeSepolia",
     "deploy:mReceiver": "forge script ./script/Deploy.s.sol:DeployMessageReceiver -vvv --broadcast --rpc-url ethereumSepolia",
